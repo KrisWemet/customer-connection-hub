@@ -57,6 +57,27 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        status: {
+          success: "hsl(var(--status-success))",
+          "success-light": "hsl(var(--status-success-light))",
+          warning: "hsl(var(--status-warning))",
+          "warning-light": "hsl(var(--status-warning-light))",
+          danger: "hsl(var(--status-danger))",
+          "danger-light": "hsl(var(--status-danger-light))",
+          info: "hsl(var(--status-info))",
+          "info-light": "hsl(var(--status-info-light))",
+          purple: "hsl(var(--status-purple))",
+          "purple-light": "hsl(var(--status-purple-light))",
+        },
+        module: {
+          calendar: "hsl(var(--module-calendar))",
+          leads: "hsl(var(--module-leads))",
+          proposals: "hsl(var(--module-proposals))",
+          invoices: "hsl(var(--module-invoices))",
+          contracts: "hsl(var(--module-contracts))",
+          files: "hsl(var(--module-files))",
+          contacts: "hsl(var(--module-contacts))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -65,25 +86,31 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        "fade-in": {
+          from: { opacity: "0", transform: "translateY(10px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "slide-in": {
+          from: { transform: "translateX(-100%)" },
+          to: { transform: "translateX(0)" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "fade-in": "fade-in 0.3s ease-out",
+        "slide-in": "slide-in 0.3s ease-out",
+      },
+      boxShadow: {
+        card: "0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.08)",
+        "card-hover": "0 4px 12px 0 rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.08)",
       },
     },
   },
