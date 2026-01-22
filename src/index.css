@@ -2,95 +2,107 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 0 0% 97%;
+    --foreground: 210 20% 20%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 210 20% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 210 20% 20%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 174 70% 30%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 210 20% 20%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 210 15% 95%;
+    --muted-foreground: 210 10% 50%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 174 60% 95%;
+    --accent-foreground: 174 70% 25%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 210 20% 90%;
+    --input: 210 20% 90%;
+    --ring: 174 70% 30%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* CRM Status Colors */
+    --status-success: 145 65% 42%;
+    --status-success-light: 145 65% 95%;
+    --status-warning: 35 95% 55%;
+    --status-warning-light: 35 95% 95%;
+    --status-danger: 0 72% 55%;
+    --status-danger-light: 0 72% 96%;
+    --status-info: 210 85% 55%;
+    --status-info-light: 210 85% 96%;
+    --status-purple: 270 65% 55%;
+    --status-purple-light: 270 65% 96%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Sidebar */
+    --sidebar-background: 174 70% 22%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 174 70% 22%;
+    --sidebar-accent: 174 65% 28%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 174 60% 18%;
+    --sidebar-ring: 174 70% 40%;
 
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Module Colors */
+    --module-calendar: 210 85% 55%;
+    --module-leads: 145 65% 42%;
+    --module-proposals: 270 65% 55%;
+    --module-invoices: 35 95% 55%;
+    --module-contracts: 0 72% 55%;
+    --module-files: 190 80% 50%;
+    --module-contacts: 330 70% 55%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 210 20% 10%;
+    --foreground: 0 0% 95%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 210 20% 12%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 210 20% 12%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 174 60% 45%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 210 20% 18%;
+    --secondary-foreground: 0 0% 95%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 210 20% 18%;
+    --muted-foreground: 210 10% 60%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 174 50% 20%;
+    --accent-foreground: 174 60% 70%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --border: 210 20% 20%;
+    --input: 210 20% 20%;
+    --ring: 174 60% 45%;
+
+    --sidebar-background: 174 70% 15%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 174 60% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 174 60% 20%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 174 60% 12%;
+    --sidebar-ring: 174 60% 50%;
   }
 }
 
@@ -101,5 +113,31 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .status-badge {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .status-badge-success {
+    @apply bg-[hsl(var(--status-success-light))] text-[hsl(var(--status-success))];
+  }
+
+  .status-badge-warning {
+    @apply bg-[hsl(var(--status-warning-light))] text-[hsl(var(--status-warning))];
+  }
+
+  .status-badge-danger {
+    @apply bg-[hsl(var(--status-danger-light))] text-[hsl(var(--status-danger))];
+  }
+
+  .status-badge-info {
+    @apply bg-[hsl(var(--status-info-light))] text-[hsl(var(--status-info))];
+  }
+
+  .module-icon {
+    @apply w-10 h-10 rounded-full flex items-center justify-center text-white;
   }
 }
