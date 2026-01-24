@@ -9,27 +9,27 @@ import {
 } from "recharts";
 
 const data = [
-  { name: "Leads", value: 2, color: "#2196F3" },
-  { name: "Food/Bev", value: 4, color: "#4CAF50" },
-  { name: "Invoice", value: 1, color: "#FF9800" },
-  { name: "Uploaded", value: 3, color: "#9C27B0" },
-  { name: "Notes", value: 3, color: "#607D8B" },
-  { name: "Form", value: 12, color: "#00BCD4" },
-  { name: "Itinerary", value: 14, color: "#8BC34A" },
-  { name: "Floorplans", value: 3, color: "#FF5722" },
-  { name: "Messages", value: 6, color: "#E91E63" },
+  { name: "Inquiries", value: 4, color: "#2196F3" },
+  { name: "Tours", value: 3, color: "#4CAF50" },
+  { name: "Contracts", value: 2, color: "#FF9800" },
+  { name: "Payments", value: 2, color: "#9C27B0" },
+  { name: "Documents", value: 5, color: "#607D8B" },
+  { name: "Checklist", value: 9, color: "#00BCD4" },
+  { name: "Guest RSVPs", value: 14, color: "#8BC34A" },
+  { name: "RV Spots", value: 6, color: "#FF5722" },
+  { name: "Messages", value: 7, color: "#E91E63" },
 ];
 
 const legendItems = [
-  { label: "2 Leads Captured", color: "#2196F3" },
-  { label: "4 Food/Beverage Packages Created", color: "#4CAF50" },
-  { label: "1 Invoice Payments", color: "#FF9800" },
-  { label: "3 Uploaded Files", color: "#9C27B0" },
-  { label: "3 Notes Created", color: "#607D8B" },
-  { label: "12 Form Responses Collected", color: "#00BCD4" },
-  { label: "14 Itinerary Items Created", color: "#8BC34A" },
-  { label: "3 Floorplans Created", color: "#FF5722" },
-  { label: "6 Messages", color: "#E91E63" },
+  { label: "4 Inquiries Captured", color: "#2196F3" },
+  { label: "3 Tours Scheduled", color: "#4CAF50" },
+  { label: "2 Contracts Sent", color: "#FF9800" },
+  { label: "2 Payments Logged", color: "#9C27B0" },
+  { label: "5 Documents Uploaded", color: "#607D8B" },
+  { label: "9 Checklist Updates", color: "#00BCD4" },
+  { label: "14 Guest RSVPs", color: "#8BC34A" },
+  { label: "6 RV/Tent Spots Added", color: "#FF5722" },
+  { label: "7 Messages", color: "#E91E63" },
 ];
 
 export function ActivityChart() {

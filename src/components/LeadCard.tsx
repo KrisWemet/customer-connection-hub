@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Star, Filter, Plus, Users } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export interface LeadCardData {
   id: string;
@@ -19,7 +20,10 @@ interface LeadCardProps {
 
 export function LeadCard({ lead }: LeadCardProps) {
   return (
-    <div className="bg-card rounded-lg border border-border/50 shadow-card p-4 mb-3 animate-fade-in hover:shadow-card-hover transition-shadow">
+    <Link
+      to={`/leads/${lead.id}`}
+      className="block bg-card rounded-lg border border-border/50 shadow-card p-4 mb-3 animate-fade-in hover:shadow-card-hover transition-shadow focus:outline-none focus:ring-2 focus:ring-primary/30"
+    >
       <div className="mb-3">
         <h4 className="font-semibold text-foreground text-sm">{lead.title}</h4>
         <p className="text-xs text-muted-foreground">{lead.date}</p>
@@ -82,22 +86,16 @@ export function LeadCard({ lead }: LeadCardProps) {
       )}
 
       <div className="flex items-center justify-between pt-2 border-t border-border/50">
-        <div className="flex gap-2">
-          <button className="p-1.5 hover:bg-muted rounded transition-colors">
-            <Star size={14} className="text-muted-foreground" />
-          </button>
-          <button className="p-1.5 hover:bg-muted rounded transition-colors">
-            <Filter size={14} className="text-muted-foreground" />
-          </button>
-          <button className="p-1.5 hover:bg-muted rounded transition-colors">
-            <Plus size={14} className="text-muted-foreground" />
-          </button>
+        <div className="flex gap-2 text-muted-foreground">
+          <Star size={14} />
+          <Filter size={14} />
+          <Plus size={14} />
         </div>
       </div>
 
-      <button className="text-xs text-primary hover:underline mt-2">
+      <span className="block text-xs text-primary hover:underline mt-2">
         View Pipeline History ▾
-      </button>
-    </div>
+      </span>
+    </Link>
   );
 }

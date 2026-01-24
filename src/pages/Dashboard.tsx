@@ -11,22 +11,22 @@ import {
 import { StatusCard } from "@/components/StatusCard";
 
 const upcomingData = [
-  { name: "Expiring Holds", value: 1, color: "#3B82F6" },
-  { name: "Invoices", value: 1, color: "#60A5FA" },
-  { name: "Scheduled Payments", value: 1, color: "#93C5FD" },
-  { name: "Appointments", value: 3, color: "#BFDBFE" },
-  { name: "To-Dos", value: 8, color: "#DBEAFE" },
+  { name: "Upcoming Bookings", value: 2, color: "#3B82F6" },
+  { name: "Tours/Calls", value: 3, color: "#60A5FA" },
+  { name: "Payment Milestones", value: 2, color: "#93C5FD" },
+  { name: "Checklist Items", value: 6, color: "#BFDBFE" },
+  { name: "Vendor Documents", value: 4, color: "#DBEAFE" },
 ];
 
 const overdueData = [
-  { name: "Invoices", value: 1, color: "#EF4444" },
-  { name: "To-Dos", value: 5, color: "#F87171" },
+  { name: "Payments", value: 2, color: "#EF4444" },
+  { name: "Checklist Items", value: 4, color: "#F87171" },
 ];
 
 const waitingData = [
-  { name: "Contract Signatures", value: 1, color: "#F59E0B" },
-  { name: "Proposal Signatures", value: 4, color: "#FBBF24" },
-  { name: "BEO Signatures", value: 3, color: "#FCD34D" },
+  { name: "Contract Signatures", value: 2, color: "#F59E0B" },
+  { name: "Questionnaires", value: 3, color: "#FBBF24" },
+  { name: "Vendor COIs", value: 2, color: "#FCD34D" },
 ];
 
 export default function Dashboard() {
@@ -36,11 +36,11 @@ export default function Dashboard() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-primary">DENVER HOUSE</h1>
-            <p className="text-muted-foreground tracking-widest text-sm">E V E N T S</p>
+            <h1 className="text-3xl font-bold text-primary">RUSTIC RETREAT</h1>
+            <p className="text-muted-foreground tracking-widest text-sm">W E D D I N G  V E N U E</p>
           </div>
           <button className="px-4 py-2 text-sm bg-muted hover:bg-muted/80 rounded-lg transition-colors">
-            Set View Filters ▾
+            View Filters ▾
           </button>
         </div>
 
@@ -57,11 +57,11 @@ export default function Dashboard() {
             subtitle="Next 60 days ▾"
             data={upcomingData}
             items={[
-              { label: "1 Expiring Holds", dotColor: "#3B82F6" },
-              { label: "1 Invoices", dotColor: "#60A5FA" },
-              { label: "1 Invoice Scheduled Payments", dotColor: "#93C5FD" },
-              { label: "3 Appointments", dotColor: "#BFDBFE" },
-              { label: "8 To-Dos", dotColor: "#DBEAFE" },
+              { label: "2 Upcoming Bookings", dotColor: "#3B82F6" },
+              { label: "3 Tours/Calls", dotColor: "#60A5FA" },
+              { label: "2 Payment Milestones", dotColor: "#93C5FD" },
+              { label: "6 Checklist Items", dotColor: "#BFDBFE" },
+              { label: "4 Vendor Documents", dotColor: "#DBEAFE" },
             ]}
           />
           <DonutChart
@@ -70,8 +70,8 @@ export default function Dashboard() {
             subtitle="Last 180 days ▾"
             data={overdueData}
             items={[
-              { label: "1 Invoices", dotColor: "#EF4444" },
-              { label: "5 To-Dos", dotColor: "#F87171" },
+              { label: "2 Payments", dotColor: "#EF4444" },
+              { label: "4 Checklist Items", dotColor: "#F87171" },
             ]}
           />
           <DonutChart
@@ -80,9 +80,9 @@ export default function Dashboard() {
             subtitle="Last 180 days ▾"
             data={waitingData}
             items={[
-              { label: "1 Contract Signatures", dotColor: "#F59E0B" },
-              { label: "4 Proposal Signatures", dotColor: "#FBBF24" },
-              { label: "3 BEO Signatures", dotColor: "#FCD34D" },
+              { label: "2 Contract Signatures", dotColor: "#F59E0B" },
+              { label: "3 Questionnaires", dotColor: "#FBBF24" },
+              { label: "2 Vendor COIs", dotColor: "#FCD34D" },
             ]}
           />
         </div>
@@ -95,10 +95,10 @@ export default function Dashboard() {
             icon={RotateCcw}
             color="gray"
             items={[
-              { label: "LEADS CAPTURED", count: 2 },
-              { label: "INVOICE PAYMENTS ($1,275.50)", count: 1 },
-              { label: "FORM RESPONSES RECEIVED", count: 2 },
-              { label: "CONTRACT SIGNATURE COLLECTED", count: 1 },
+              { label: "INQUIRIES CAPTURED", count: 3 },
+              { label: "PAYMENTS RECEIVED ($3,250.00)", count: 1 },
+              { label: "PLANNING FORMS COMPLETED", count: 2 },
+              { label: "CONTRACT SIGNED", count: 1 },
             ]}
           />
           <StatusCard
@@ -107,10 +107,10 @@ export default function Dashboard() {
             icon={AlertTriangle}
             color="danger"
             items={[
-              { label: "TO-DO'S OVERDUE", count: 2 },
-              { label: "BUDGET PAYMENT ($4,564.25)", count: 1 },
-              { label: "INVOICE PAYMENT ($308.00)", count: 1 },
-              { label: "INVOICES ($3,449.75)", count: 2 },
+              { label: "CHECKLIST ITEMS OVERDUE", count: 3 },
+              { label: "PAYMENT 2 ($4,250.00)", count: 1 },
+              { label: "FINAL PAYMENT ($7,800.00)", count: 1 },
+              { label: "VENDOR COI REQUESTS", count: 1 },
             ]}
           />
           <StatusCard
@@ -119,10 +119,10 @@ export default function Dashboard() {
             icon={Clock}
             color="warning"
             items={[
-              { label: "CONTRACTS WAITING FOR SIGNATURES", count: 2 },
-              { label: "FORM WAITING FOR RESPONSE", count: 1 },
-              { label: "LOGIN WAITING FOR SETUP", count: 1 },
-              { label: "PROPOSAL WAITING FOR SIGNATURE", count: 2 },
+              { label: "CONTRACTS OUT FOR SIGNATURE", count: 2 },
+              { label: "PLANNING QUESTIONNAIRE", count: 1 },
+              { label: "PORTAL ACCOUNTS TO SET UP", count: 1 },
+              { label: "HOLD REVIEW EXPIRING", count: 2 },
             ]}
           />
           <StatusCard
@@ -131,9 +131,9 @@ export default function Dashboard() {
             icon={Calendar}
             color="info"
             items={[
-              { label: "EVENTS", count: 2 },
-              { label: "APPOINTMENTS", count: 4 },
-              { label: "INVOICE PAYMENT ($2,500.00)", count: 1 },
+              { label: "EVENT WEEKENDS", count: 2 },
+              { label: "SITE TOURS", count: 4 },
+              { label: "DEPOSIT DUE ($2,500.00)", count: 1 },
             ]}
           />
         </div>

@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "customer-connection-hub",
+			"path": ".."
+		},
+		{
+			"name": "Documentation",
+			"path": "../../rustic-retreat-crm/Documentation"
+		}
+	],
+	"settings": {}
+}

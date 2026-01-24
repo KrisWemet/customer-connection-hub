@@ -16,24 +16,24 @@ import {
 } from "lucide-react";
 
 const modules = [
-  { title: "Attendee List", count: 1, icon: Users, color: "bg-module-calendar", href: "/attendees" },
-  { title: "Banquet Event Order (BEO)", count: 1, icon: ClipboardList, color: "bg-status-warning", href: "/beo" },
-  { title: "Contracts", count: 0, icon: FileText, color: "bg-status-success", href: "/contracts" },
-  { title: "Files", count: 2, icon: File, color: "bg-module-files", href: "/files" },
-  { title: "Floorplan", count: 1, icon: LayoutGrid, color: "bg-status-warning", href: "/floorplan" },
-  { title: "Food & Beverage", count: 1, icon: Utensils, color: "bg-status-success", href: "/food-beverage" },
-  { title: "Itinerary", count: 1, icon: ListTodo, color: "bg-status-danger", href: "/itinerary" },
-  { title: "Proposals & Invoices", count: 2, icon: FileText, color: "bg-status-warning", href: "/proposals", badge: { text: "2 items require attention", variant: "danger" as const } },
-  { title: "Questionnaire", count: 1, icon: ClipboardList, color: "bg-status-purple", href: "/questionnaire", badge: { text: "1 item requires attention", variant: "danger" as const } },
-  { title: "To-Do's", count: 29, icon: ListTodo, color: "bg-status-success", href: "/todos", badge: { text: "20 overdue / 4 upcoming", variant: "warning" as const } },
-  { title: "Vision Board", count: 1, icon: Image, color: "bg-status-success", href: "/vision-board" },
+  { title: "Guest List", count: 78, icon: Users, color: "bg-module-calendar", href: "/guests" },
+  { title: "RV & Camping", count: 12, icon: ClipboardList, color: "bg-status-warning", href: "/camping" },
+  { title: "Contracts", count: 1, icon: FileText, color: "bg-status-success", href: "/contracts" },
+  { title: "Documents", count: 4, icon: File, color: "bg-module-files", href: "/documents" },
+  { title: "Floor Plan", count: 1, icon: LayoutGrid, color: "bg-status-warning", href: "/floorplan" },
+  { title: "Vendors", count: 5, icon: Utensils, color: "bg-status-success", href: "/vendors" },
+  { title: "Weekend Timeline", count: 8, icon: ListTodo, color: "bg-status-danger", href: "/timeline" },
+  { title: "Payments", count: 3, icon: CreditCard, color: "bg-status-warning", href: "/payments", badge: { text: "1 payment due soon", variant: "danger" as const } },
+  { title: "Planning Checklist", count: 24, icon: ClipboardList, color: "bg-status-purple", href: "/checklist", badge: { text: "4 items due this month", variant: "warning" as const } },
+  { title: "To-Do's", count: 14, icon: ListTodo, color: "bg-status-success", href: "/todos", badge: { text: "6 overdue / 3 upcoming", variant: "warning" as const } },
+  { title: "Photo Share", count: 2, icon: Image, color: "bg-status-success", href: "/photos" },
 ];
 
 const quickLinks = [
-  { title: "My Payment Methods", icon: CreditCard, href: "/payments" },
-  { title: "Contacts", icon: UserCircle, href: "/contacts" },
-  { title: "Vendors", icon: Building2, href: "/vendors" },
-  { title: "Venues", icon: MapPin, href: "/venues" },
+  { title: "Payment Schedule", icon: CreditCard, href: "/payments" },
+  { title: "Couple Profile", icon: UserCircle, href: "/profile" },
+  { title: "Preferred Vendors", icon: Building2, href: "/vendors" },
+  { title: "Venue Guide", icon: MapPin, href: "/venue-guide" },
 ];
 
 export default function ClientPortal() {
@@ -43,11 +43,11 @@ export default function ClientPortal() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-status-danger italic">
-            Welcome to your Client Portal!
+            Welcome to Rustic Retreat!
           </h1>
           <div className="text-right">
-            <p className="text-lg font-semibold text-foreground">FISHER</p>
-            <p className="text-sm text-muted-foreground">GARDEN HOTEL</p>
+            <p className="text-lg font-semibold text-foreground">MORGAN + TAYLOR</p>
+            <p className="text-sm text-muted-foreground">September 19, 2026</p>
           </div>
         </div>
 

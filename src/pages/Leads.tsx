@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { KanbanColumn } from "@/components/KanbanColumn";
 import { LeadCardData } from "@/components/LeadCard";
@@ -15,94 +16,158 @@ import {
 import { cn } from "@/lib/utils";
 
 const statusCards = [
-  { title: "Captured", count: 1, icon: UserPlus, color: "bg-module-calendar", subtitle: "past 60 days ▾" },
-  { title: "Lost", count: 0, icon: X, color: "bg-status-warning", subtitle: "(Closed) past 3 days ▾", subtitleText: "Closed" },
-  { title: "Won", count: 0, icon: Trophy, color: "bg-status-warning", subtitle: "(Booked) past 60 days ▾", subtitleText: "Booked" },
-  { title: "Open", count: 3, icon: FolderOpen, color: "bg-primary", subtitle: "View" },
+  { title: "New Inquiries", count: 3, icon: UserPlus, color: "bg-module-calendar", subtitle: "last 30 days ▾" },
+  { title: "Declined", count: 1, icon: X, color: "bg-status-warning", subtitle: "last 90 days ▾", subtitleText: "Closed" },
+  { title: "Booked", count: 2, icon: Trophy, color: "bg-status-warning", subtitle: "last 180 days ▾", subtitleText: "Confirmed" },
+  { title: "Open", count: 4, icon: FolderOpen, color: "bg-primary", subtitle: "View" },
   { title: "Holds", count: 1, icon: Clock, color: "bg-status-warning", subtitle: "View" },
 ];
 
-const filterTags = ["Open + Holds", "All Event Dates", "All Captured"];
+const filterTags = ["Open + Holds", "All Event Dates", "New Inquiries"];
 
 const quickViews = [
   "All",
   "Open + Holds",
-  "Open",
-  "Holds",
-  "Lost (Closed)",
-  "Captured",
-  "Next 7 Days",
+  "Tours Scheduled",
+  "Contract Sent",
+  "Booked",
+  "Declined",
+  "Next 30 Days",
 ];
 
 const columns: { title: string; leads: LeadCardData[] }[] = [
   {
-    title: "New Lead",
+    title: "Inquiry",
     leads: [
       {
         id: "1",
-        title: "Scarborough Reception",
-        date: "10/01/2021",
-        time: "2:00 PM - 10:00 PM",
+        title: "Harper + Luca Wedding",
+        date: "06/13/2026",
+        time: "Weekend Package (3-Day)",
         status: "open",
-        daysOld: 391,
-        daysInStep: 0,
-        contacts: ["Josh Scarborough", "Aaron Adams", "Cindy Ang (The Ranch at Evergreen)"],
+        daysOld: 2,
+        daysInStep: 1,
+        contacts: ["Harper Miles", "Luca Ortiz"],
       },
     ],
   },
   {
-    title: "First Contact",
+    title: "Tour/Call Scheduled",
     leads: [
       {
         id: "2",
-        title: "Launch Party @ Arts Center",
-        date: "10/19/2018",
-        time: "6:00 PM - 10:30 PM",
+        title: "Bennett + Rivers",
+        date: "08/22/2026",
+        time: "Site Tour • Jan 29, 2026",
         status: "open",
-        daysOld: 1818,
-        daysInStep: 0,
-        contacts: ["Miranda Pope (Mirra Group Ventures)", "Jane Babbit", "Janice Doerty", "Erica Blake", "Laura Finch"],
+        daysOld: 5,
+        daysInStep: 2,
+        contacts: ["Morgan Bennett", "Quinn Rivers"],
         tags: [
-          { label: "Brand/Product Launch", color: "#3B82F6" },
-          { label: "Fundraiser", color: "#22C55E" },
-          { label: "Gala/Celebration", color: "#EF4444" },
+          { label: "3-Day Package", color: "#3B82F6" },
+          { label: "80 Guests", color: "#22C55E" },
+          { label: "Camping Add-On", color: "#EF4444" },
         ],
       },
     ],
   },
   {
-    title: "Lead Qualified",
+    title: "Approved",
     leads: [
       {
         id: "3",
-        title: "Morris Industries Open House",
-        date: "09/13/2018",
-        time: "2:00 PM - 9:30 PM",
+        title: "Nguyen + Patel",
+        date: "05/02/2026",
+        time: "2-Day Package (Tue-Wed)",
         status: "hold",
-        daysOld: 1423,
-        daysInStep: 0,
-        contacts: [],
+        daysOld: 12,
+        daysInStep: 4,
+        contacts: ["Avery Nguyen", "Sam Patel"],
       },
     ],
   },
   {
-    title: "Appointment/Call Scheduled",
+    title: "Contract Sent",
     leads: [
       {
         id: "4",
-        title: "Sunflower Festival (Sample Lead)",
-        date: "02/23/2022",
-        time: "9:00 AM - 5:00 PM",
+        title: "Owens + Clarke",
+        date: "09/18/2026",
+        time: "5-Day Package (Thu-Tue)",
         status: "open",
-        daysOld: 0,
-        daysInStep: 0,
-        contacts: ["John Appleseed (Fun Adventures Ltd)"],
+        daysOld: 18,
+        daysInStep: 6,
+        contacts: ["Jules Owens", "Casey Clarke"],
       },
     ],
+  },
+  {
+    title: "Contract Signed",
+    leads: [],
+  },
+  {
+    title: "Booking Confirmed",
+    leads: [],
+  },
+  {
+    title: "Pre-Event Checklist",
+    leads: [],
+  },
+  {
+    title: "Event Week",
+    leads: [],
+  },
+  {
+    title: "Post-Event Inspection",
+    leads: [],
   },
 ];
 
 export default function Leads() {
+  const [activeQuickView, setActiveQuickView] = useState<string>("Open + Holds");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+  const now = new Date();
+
+  const filteredColumns = columns
+    .filter((column) => {
+      if (activeQuickView === "Tours Scheduled") return column.title === "Tour/Call Scheduled";
+      if (activeQuickView === "Contract Sent") return column.title === "Contract Sent";
+      if (activeQuickView === "Booked") return column.title === "Booking Confirmed";
+      if (activeQuickView === "Declined") return column.title === "Declined";
+      return true;
+    })
+    .map((column) => {
+      const filteredLeads = column.leads.filter((lead) => {
+        if (activeQuickView === "Open + Holds" && !["open", "hold"].includes(lead.status)) {
+          return false;
+        }
+        if (activeQuickView === "Next 30 Days") {
+          const [month, day, year] = lead.date.split("/").map(Number);
+          if (!month || !day || !year) return false;
+          const date = new Date(year, month - 1, day);
+          const diffDays = (date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+          if (diffDays < 0 || diffDays > 30) return false;
+        }
+        if (normalizedSearch) {
+          const haystack = [
+            lead.title,
+            lead.date,
+            lead.time,
+            ...lead.contacts,
+            ...(lead.tags?.map((tag) => tag.label) ?? []),
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
+          return haystack.includes(normalizedSearch);
+        }
+        return true;
+      });
+      return { ...column, leads: filteredLeads };
+    });
+
   return (
     <AppLayout>
       <div className="p-8">
@@ -110,21 +175,21 @@ export default function Leads() {
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
           <a href="/" className="hover:text-primary">Home</a>
           <span>//</span>
-          <span>Leads</span>
+          <span>Inquiries</span>
         </div>
 
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-4xl font-bold text-primary">Leads</h1>
+          <h1 className="text-4xl font-bold text-primary">Inquiries</h1>
           <a href="#" className="text-sm text-primary hover:underline flex items-center gap-1">
-            📋 Activity Log
+            📋 Inquiry Timeline
           </a>
         </div>
 
         {/* Actions */}
         <div className="flex items-center gap-3 mb-6">
           <button className="px-4 py-2 bg-foreground text-background rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
-            Add Lead
+            Add Inquiry
           </button>
           <button className="px-4 py-2 bg-muted text-foreground rounded-lg text-sm font-medium hover:bg-muted/80 transition-colors">
             Setup ▾
@@ -135,6 +200,8 @@ export default function Leads() {
               type="text"
               placeholder="Begin typing to filter current view..."
               className="w-72 px-4 py-2 bg-card border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
             />
           </div>
           <button className="px-4 py-2 bg-muted text-foreground rounded-lg text-sm font-medium hover:bg-muted/80 transition-colors">
@@ -178,9 +245,11 @@ export default function Leads() {
               {quickViews.map((view, idx) => (
                 <button
                   key={idx}
+                  type="button"
+                  onClick={() => setActiveQuickView(view)}
                   className={cn(
                     "w-full text-left px-3 py-2 rounded-lg text-sm transition-colors",
-                    idx === 1
+                    activeQuickView === view
                       ? "bg-primary/10 text-primary font-medium"
                       : "text-muted-foreground hover:bg-muted"
                   )}
@@ -221,7 +290,7 @@ export default function Leads() {
 
             {/* Kanban Board */}
             <div className="flex gap-4 overflow-x-auto pb-4">
-              {columns.map((column, idx) => (
+              {filteredColumns.map((column, idx) => (
                 <KanbanColumn
                   key={idx}
                   title={column.title}

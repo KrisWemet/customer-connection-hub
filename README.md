@@ -1,73 +1,63 @@
-# Welcome to your Lovable project
+# Rustic Retreat CRM
 
-## Project info
+Custom CRM for Rustic Retreat to manage wedding venue inquiries, bookings, and client planning.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
-
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+## Getting started
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Environment variables
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Create a `.env.local` with:
 
-**Use GitHub Codespaces**
+```sh
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+For integration tests, create `.env.test.local` (see `.env.test.example`) with a service role key:
 
-## What technologies are used for this project?
+```sh
+SUPABASE_URL=your_supabase_url
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+```
 
-This project is built with:
+## Test strategy (test pyramid)
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- Unit tests: pure logic (booking rules, pricing helpers, validators).
+- Integration tests: Supabase CRUD hits real endpoints and asserts DB state.
+- No-browser smoke tests: in-process UI journeys with MemoryRouter + Testing Library.
 
-## How can I deploy this project?
+### Run tests locally
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+```sh
+npm test
+```
 
-## Can I connect a custom domain to my Lovable project?
+### Run by layer
 
-Yes, you can!
+```sh
+npm run test:unit
+npm run test:integration
+```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Test data seeding
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+```sh
+node scripts/seed-test-data.mjs
+node scripts/cleanup-test-data.mjs <testRunId>
+```
+
+## Scripts
+
+- `npm run dev` - start the dev server
+- `npm run build` - build for production
+- `npm run preview` - preview the production build
+- `npm run lint` - run ESLint
+- `npm run test` - run unit + smoke tests (no real Supabase)
+- `npm run test:all` - run unit + smoke + integration tests
+- `npm run test:integration` - run real Supabase integration tests
+- `npm run test:ci` - CI-friendly full test run
