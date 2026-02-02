@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { AppLayout } from "@/components/AppLayout";
 import { KanbanColumn } from "@/components/KanbanColumn";
 import { LeadCardData } from "@/components/LeadCard";
-import { 
-  UserPlus, 
-  X, 
-  Trophy, 
-  FolderOpen, 
+import {
+  UserPlus,
+  X,
+  Trophy,
+  FolderOpen,
   Clock,
   Search,
   Filter,
@@ -14,13 +15,15 @@ import {
   List
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabase, supabaseConfigured } from "@/lib/supabase/client";
+import type { Tables } from "@/types/supabase";
 
-const statusCards = [
-  { title: "New Inquiries", count: 3, icon: UserPlus, color: "bg-module-calendar", subtitle: "last 30 days ▾" },
-  { title: "Declined", count: 1, icon: X, color: "bg-status-warning", subtitle: "last 90 days ▾", subtitleText: "Closed" },
-  { title: "Booked", count: 2, icon: Trophy, color: "bg-status-warning", subtitle: "last 180 days ▾", subtitleText: "Confirmed" },
-  { title: "Open", count: 4, icon: FolderOpen, color: "bg-primary", subtitle: "View" },
-  { title: "Holds", count: 1, icon: Clock, color: "bg-status-warning", subtitle: "View" },
+const emptyStatusCards = [
+  { title: "New Inquiries", count: 0, icon: UserPlus, color: "bg-module-calendar", subtitle: "last 30 days ▾" },
+  { title: "Declined", count: 0, icon: X, color: "bg-status-warning", subtitle: "last 90 days ▾", subtitleText: "Closed" },
+  { title: "Booked", count: 0, icon: Trophy, color: "bg-status-warning", subtitle: "last 180 days ▾", subtitleText: "Confirmed" },
+  { title: "Open", count: 0, icon: FolderOpen, color: "bg-primary", subtitle: "View" },
+  { title: "Holds", count: 0, icon: Clock, color: "bg-status-warning", subtitle: "View" },
 ];
 
 const filterTags = ["Open + Holds", "All Event Dates", "New Inquiries"];
@@ -35,100 +38,100 @@ const quickViews = [
   "Next 30 Days",
 ];
 
-const columns: { title: string; leads: LeadCardData[] }[] = [
-  {
-    title: "Inquiry",
-    leads: [
-      {
-        id: "1",
-        title: "Harper + Luca Wedding",
-        date: "06/13/2026",
-        time: "Weekend Package (3-Day)",
-        status: "open",
-        daysOld: 2,
-        daysInStep: 1,
-        contacts: ["Harper Miles", "Luca Ortiz"],
-      },
-    ],
-  },
-  {
-    title: "Tour/Call Scheduled",
-    leads: [
-      {
-        id: "2",
-        title: "Bennett + Rivers",
-        date: "08/22/2026",
-        time: "Site Tour • Jan 29, 2026",
-        status: "open",
-        daysOld: 5,
-        daysInStep: 2,
-        contacts: ["Morgan Bennett", "Quinn Rivers"],
-        tags: [
-          { label: "3-Day Package", color: "#3B82F6" },
-          { label: "80 Guests", color: "#22C55E" },
-          { label: "Camping Add-On", color: "#EF4444" },
-        ],
-      },
-    ],
-  },
-  {
-    title: "Approved",
-    leads: [
-      {
-        id: "3",
-        title: "Nguyen + Patel",
-        date: "05/02/2026",
-        time: "2-Day Package (Tue-Wed)",
-        status: "hold",
-        daysOld: 12,
-        daysInStep: 4,
-        contacts: ["Avery Nguyen", "Sam Patel"],
-      },
-    ],
-  },
-  {
-    title: "Contract Sent",
-    leads: [
-      {
-        id: "4",
-        title: "Owens + Clarke",
-        date: "09/18/2026",
-        time: "5-Day Package (Thu-Tue)",
-        status: "open",
-        daysOld: 18,
-        daysInStep: 6,
-        contacts: ["Jules Owens", "Casey Clarke"],
-      },
-    ],
-  },
-  {
-    title: "Contract Signed",
-    leads: [],
-  },
-  {
-    title: "Booking Confirmed",
-    leads: [],
-  },
-  {
-    title: "Pre-Event Checklist",
-    leads: [],
-  },
-  {
-    title: "Event Week",
-    leads: [],
-  },
-  {
-    title: "Post-Event Inspection",
-    leads: [],
-  },
+type Inquiry = Tables<"inquiries">;
+
+const baseColumns: { title: string; statuses: Inquiry["status"][] }[] = [
+  { title: "Inquiry", statuses: ["inquiry"] },
+  { title: "Tour/Call Scheduled", statuses: ["tour_scheduled"] },
+  { title: "Approved", statuses: ["contacted"] },
+  { title: "Contract Sent", statuses: ["proposal_sent"] },
+  { title: "Contract Signed", statuses: ["booked"] },
+  { title: "Booking Confirmed", statuses: ["completed"] },
+  { title: "Pre-Event Checklist", statuses: [] },
+  { title: "Event Week", statuses: [] },
+  { title: "Post-Event Inspection", statuses: [] },
 ];
 
 export default function Leads() {
   const [activeQuickView, setActiveQuickView] = useState<string>("Open + Holds");
   const [searchTerm, setSearchTerm] = useState("");
 
+  const { data: inquiries = [] } = useQuery({
+    queryKey: ["inquiries"],
+    queryFn: async () => {
+      if (!supabaseConfigured) return [] as Inquiry[];
+      const { data, error } = await supabase
+        .from("inquiries")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as Inquiry[];
+    },
+    enabled: supabaseConfigured,
+  });
+
   const normalizedSearch = searchTerm.trim().toLowerCase();
   const now = new Date();
+
+  const columns = useMemo(() => {
+    return baseColumns.map((column) => {
+      if (column.statuses.length === 0) {
+        return { title: column.title, leads: [] as LeadCardData[] };
+      }
+
+      const leads = inquiries
+        .filter((inquiry) => column.statuses.includes(inquiry.status))
+        .map((inquiry) => {
+          const eventDate = inquiry.event_start_date || inquiry.created_at || "";
+          const date = eventDate ? new Date(eventDate) : null;
+          const formattedDate = date && !Number.isNaN(date.getTime())
+            ? date.toLocaleDateString("en-US")
+            : "";
+          const createdAt = inquiry.created_at ? new Date(inquiry.created_at) : null;
+          const daysOld = createdAt && !Number.isNaN(createdAt.getTime())
+            ? Math.max(0, Math.floor((now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24)))
+            : 0;
+
+          return {
+            id: inquiry.id,
+            title: inquiry.full_name,
+            date: formattedDate || "TBD",
+            time: inquiry.source ? `Source: ${inquiry.source}` : "Inquiry",
+            status: inquiry.status === "hold" ? "hold" : "open",
+            daysOld,
+            daysInStep: 0,
+            contacts: [inquiry.full_name],
+            tags: inquiry.estimated_guest_count
+              ? [{ label: `${inquiry.estimated_guest_count} Guests`, color: "#22C55E" }]
+              : undefined,
+          } as LeadCardData;
+        });
+
+      return { title: column.title, leads };
+    });
+  }, [inquiries, now]);
+
+  const statusCards = useMemo(() => {
+    if (!supabaseConfigured) return emptyStatusCards;
+    const counts = inquiries.reduce(
+      (acc, inquiry) => {
+        acc.total += 1;
+        if (inquiry.status === "declined") acc.declined += 1;
+        if (inquiry.status === "booked") acc.booked += 1;
+        if (inquiry.status === "hold") acc.holds += 1;
+        if (inquiry.status === "inquiry") acc.new += 1;
+        return acc;
+      },
+      { total: 0, declined: 0, booked: 0, holds: 0, new: 0 }
+    );
+    return [
+      { title: "New Inquiries", count: counts.new, icon: UserPlus, color: "bg-module-calendar", subtitle: "last 30 days ▾" },
+      { title: "Declined", count: counts.declined, icon: X, color: "bg-status-warning", subtitle: "last 90 days ▾", subtitleText: "Closed" },
+      { title: "Booked", count: counts.booked, icon: Trophy, color: "bg-status-warning", subtitle: "last 180 days ▾", subtitleText: "Confirmed" },
+      { title: "Open", count: counts.total, icon: FolderOpen, color: "bg-primary", subtitle: "View" },
+      { title: "Holds", count: counts.holds, icon: Clock, color: "bg-status-warning", subtitle: "View" },
+    ];
+  }, [inquiries]);
 
   const filteredColumns = columns
     .filter((column) => {
