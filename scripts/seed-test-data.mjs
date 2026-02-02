@@ -51,7 +51,7 @@ const { data: booking, error: bookingError } = await supabase
   .from("bookings")
   .insert({
     inquiry_id: inquiry.id,
-    package_type: "3-day",
+    package_type: "3_day_weekend",
     start_date: "2026-12-05",
     end_date: "2026-12-08",
     base_price: 10000,

@@ -1,17 +1,17 @@
 import { addDays, getDay, isAfter, differenceInCalendarDays } from "date-fns";
 
-export type PackageType = "2-day" | "3-day" | "5-day";
+export type PackageType = "3_day_weekend" | "5_day_extended" | "10_day_experience";
 
 const startDayRules: Record<PackageType, number[]> = {
-  "2-day": [2, 3], // Tue/Wed
-  "3-day": [5], // Fri
-  "5-day": [3, 4], // Wed/Thu
+  "3_day_weekend": [5], // Fri
+  "5_day_extended": [3, 4], // Wed/Thu
+  "10_day_experience": [3], // Wed
 };
 
 const durationNights: Record<PackageType, number> = {
-  "2-day": 2,
-  "3-day": 3,
-  "5-day": 5,
+  "3_day_weekend": 3,
+  "5_day_extended": 5,
+  "10_day_experience": 10,
 };
 
 export function getPackageNights(packageType: PackageType) {
@@ -28,7 +28,7 @@ export function getPackageEndDate(packageType: PackageType, startDate: Date) {
 }
 
 export function getPrepTeardownDates(startDate: Date, packageType: PackageType) {
-  if (packageType !== "5-day") {
+  if (packageType !== "5_day_extended") {
     return { prepDays: [], teardownDays: [] };
   }
   const prepDays = [startDate, addDays(startDate, 1)];

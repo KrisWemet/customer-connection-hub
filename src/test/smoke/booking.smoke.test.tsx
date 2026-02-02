@@ -18,7 +18,7 @@ vi.mock("@/lib/supabase/client", () => ({
 
 function BookingForm() {
   const navigate = useNavigate();
-  const [packageType, setPackageType] = useState("3-day");
+  const [packageType, setPackageType] = useState("3_day_weekend");
   const [startDate, setStartDate] = useState("2026-09-18");
   return (
     <div>
@@ -36,7 +36,7 @@ function BookingForm() {
       <button
         onClick={async () => {
           const computedEnd = getPackageEndDate(
-            packageType as "3-day",
+            packageType as "3_day_weekend",
             new Date(startDate)
           )
             .toISOString()
@@ -80,14 +80,14 @@ describe("smoke: booking creation flow", () => {
       expect(screen.getByRole("heading", { name: "Booking saved" })).toBeInTheDocument();
     });
 
-    const expectedEnd = getPackageEndDate("3-day", new Date("2026-09-18"))
+    const expectedEnd = getPackageEndDate("3_day_weekend", new Date("2026-09-18"))
       .toISOString()
       .slice(0, 10);
 
     expect(fromMock).toHaveBeenCalledWith("bookings");
     expect(insertMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        package_type: "3-day",
+        package_type: "3_day_weekend",
         start_date: "2026-09-18",
         end_date: expectedEnd,
         base_price: 12000,

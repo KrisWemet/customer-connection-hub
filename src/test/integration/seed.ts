@@ -32,7 +32,7 @@ export async function seedTestData(): Promise<SeededRecords> {
     .from("bookings")
     .insert({
       inquiry_id: inquiry.id,
-      package_type: "3-day",
+      package_type: "3_day_weekend",
       start_date: "2026-09-18",
       end_date: "2026-09-21",
       base_price: 12000,

@@ -48,7 +48,7 @@ describe("CRM core flows (integration)", () => {
       .from("bookings")
       .insert({
         inquiry_id: baseInquiryId,
-        package_type: "5-day",
+        package_type: "5_day_extended",
         start_date: "2026-10-01",
         end_date: "2026-10-06",
         base_price: 15500,
