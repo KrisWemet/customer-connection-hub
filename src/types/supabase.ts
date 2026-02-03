@@ -324,6 +324,7 @@ export type Database = {
           attendees: Json;
           status: "scheduled" | "completed" | "cancelled" | "no_show";
           tour_notes: string | null;
+          staff_assigned: string | null;
           follow_up_sent: boolean;
           outcome: "interested" | "not_interested" | "booked" | "thinking" | null;
           created_at: string | null;

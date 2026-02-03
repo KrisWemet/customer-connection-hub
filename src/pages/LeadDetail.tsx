@@ -10,6 +10,7 @@ import {
   sendContract,
 } from "@/lib/contracts/service";
 import { generateContractHtml } from "@/lib/contracts/template";
+import { sendMessage } from "@/lib/messaging/service";
 import { Link, useParams } from "react-router-dom";
 
 export default function LeadDetail() {
@@ -26,6 +27,12 @@ export default function LeadDetail() {
     clientName: "",
     clientEmail: "",
     clientPhone: "",
+  });
+  const [tourForm, setTourForm] = useState({
+    tourDate: "",
+    tourTime: "",
+    staffAssigned: "",
+    tourNotes: "",
   });
 
   const { data: inquiry } = useQuery({
@@ -100,6 +107,72 @@ export default function LeadDetail() {
       queryClient.invalidateQueries({ queryKey: ["inquiry", id] });
     },
   });
+
+  const scheduleTourMutation = useMutation({
+    mutationFn: async () => {
+      if (!id) throw new Error("Missing inquiry id");
+      const payload = {
+        inquiry_id: id,
+        tour_date: tourForm.tourDate,
+        tour_time: tourForm.tourTime,
+        staff_assigned: tourForm.staffAssigned || null,
+        tour_notes: tourForm.tourNotes || null,
+        attendees: [],
+        status: "scheduled",
+      };
+      const { data, error } = await supabase.from("tours").insert(payload).select("*").maybeSingle();
+      if (error || !data) throw error ?? new Error("Failed to schedule tour");
+
+      await supabase.from("inquiries").update({ status: "tour_scheduled" }).eq("id", id);
+
+      const contactId = await ensureContact({
+        name: formState.clientName || inquiry?.full_name || "",
+        email: formState.clientEmail || inquiry?.email || "",
+        phone: formState.clientPhone || inquiry?.phone || null,
+      });
+
+      const when = `${payload.tour_date} at ${payload.tour_time}`;
+      const directions =
+        "Rustic Retreat, Lac Saint Anne County (near Lac La Nonne). We’ll send a pin if you need it.";
+      const expectations =
+        "Please arrive 5–10 minutes early. Wear comfortable shoes for walking the property. Feel free to bring family or your planner.";
+
+      await sendMessage({
+        contactId,
+        channel: "email",
+        subject: "Your Rustic Retreat tour is scheduled",
+        body: `Hi ${formState.clientName || inquiry?.full_name || "there"},\n\nYour tour is booked for ${when}.\n\nDirections: ${directions}\nWhat to expect: ${expectations}\n\nIf you need to reschedule, just reply to this email.`,
+      });
+
+      return data;
+    },
+    onSuccess: () => {
+      setTourForm({ tourDate: "", tourTime: "", staffAssigned: "", tourNotes: "" });
+      queryClient.invalidateQueries({ queryKey: ["inquiry", id] });
+      queryClient.invalidateQueries({ queryKey: ["tours"] });
+    },
+  });
+
+  async function ensureContact(args: { name: string; email: string; phone?: string | null }) {
+    if (!args.email) {
+      throw new Error("Missing client email for tour confirmation");
+    }
+    const { data: existing } = await supabase.from("contacts").select("id").eq("email", args.email).maybeSingle();
+    if (existing?.id) return existing.id;
+
+    const { data, error } = await supabase
+      .from("contacts")
+      .insert({
+        name: args.name || "Rustic Retreat Client",
+        email: args.email,
+        phone: args.phone ?? null,
+        contact_type: "lead",
+      })
+      .select("id")
+      .maybeSingle();
+    if (error || !data) throw error ?? new Error("Unable to create contact");
+    return data.id;
+  }
 
   const createBookingMutation = useMutation({
     mutationFn: async () => {
@@ -188,6 +261,67 @@ export default function LeadDetail() {
             {inquiry?.status && (
               <span className="text-xs text-muted-foreground">Status: {inquiry.status}</span>
             )}
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-border bg-card p-5 shadow-card space-y-4">
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">Schedule Tour</h2>
+            <p className="text-xs text-muted-foreground">Set a tour date/time and send a confirmation email.</p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Tour Date
+              <input
+                className="mt-2 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
+                type="date"
+                value={tourForm.tourDate}
+                onChange={(event) => setTourForm({ ...tourForm, tourDate: event.target.value })}
+              />
+            </label>
+            <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Tour Time
+              <input
+                className="mt-2 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
+                type="time"
+                value={tourForm.tourTime}
+                onChange={(event) => setTourForm({ ...tourForm, tourTime: event.target.value })}
+              />
+            </label>
+            <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Staff Assigned
+              <input
+                className="mt-2 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
+                placeholder="Chris / Shannon"
+                value={tourForm.staffAssigned}
+                onChange={(event) => setTourForm({ ...tourForm, staffAssigned: event.target.value })}
+              />
+            </label>
+            <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Tour Notes
+              <input
+                className="mt-2 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
+                placeholder="Special requests, accessibility, etc."
+                value={tourForm.tourNotes}
+                onChange={(event) => setTourForm({ ...tourForm, tourNotes: event.target.value })}
+              />
+            </label>
+          </div>
+          <div className="flex items-center justify-end">
+            <button
+              type="button"
+              className={`rounded-lg px-4 py-2 text-sm font-semibold ${
+                tourForm.tourDate && tourForm.tourTime && supabaseConfigured
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground"
+              }`}
+              onClick={() => scheduleTourMutation.mutate()}
+              disabled={
+                !tourForm.tourDate || !tourForm.tourTime || !supabaseConfigured || scheduleTourMutation.isPending
+              }
+            >
+              {scheduleTourMutation.isPending ? "Scheduling..." : "Schedule Tour"}
+            </button>
           </div>
         </div>
 
