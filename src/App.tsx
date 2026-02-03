@@ -26,8 +26,7 @@ import AdminSettings from "./pages/AdminSettings";
 import LeadDetail from "./pages/LeadDetail";
 import DamageDeposits from "./pages/DamageDeposits";
 import BookingDetail from "./pages/BookingDetail";
-import MultiDayTimeline from "./pages/MultiDayTimeline";
-import DayOfCoordination from "./pages/DayOfCoordination";
+// Multi-day pages temporarily removed
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Unauthorized from "./pages/Unauthorized";
@@ -149,17 +148,7 @@ const App = () => (
                 </ProtectedRoute>
               } />
 
-              {/* Multi-day event routes */}
-              <Route path="/bookings/:id/timeline" element={
-                <ProtectedRoute requiredRole="admin">
-                  <MultiDayTimeline />
-                </ProtectedRoute>
-              } />
-              <Route path="/bookings/:id/day-of" element={
-                <ProtectedRoute requiredRole="admin">
-                  <DayOfCoordination />
-                </ProtectedRoute>
-              } />
+              {/* Multi-day event routes temporarily removed */}
 
               {/* Client protected routes */}
               <Route path="/portal" element={
