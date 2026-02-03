@@ -16,6 +16,7 @@ export default function LeadDetail() {
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
   const [showPreview, setShowPreview] = useState(false);
+  const [autoSendContract, setAutoSendContract] = useState(true);
   const [formState, setFormState] = useState({
     packageType: "3_day_weekend",
     eventStartDate: "",
@@ -65,8 +66,11 @@ export default function LeadDetail() {
         clientPhone: formState.clientPhone || inquiry?.phone || null,
       });
     },
-    onSuccess: () => {
+    onSuccess: (contract) => {
       queryClient.invalidateQueries({ queryKey: ["contracts", id] });
+      if (autoSendContract && contract?.id) {
+        sendMutation.mutate({ contractId: contract.id, method: "email" });
+      }
     },
   });
 
@@ -83,6 +87,17 @@ export default function LeadDetail() {
     mutationFn: async (contractId: string) => cancelContract(contractId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contracts", id] });
+    },
+  });
+
+  const markTourMutation = useMutation({
+    mutationFn: async () => {
+      if (!id) throw new Error("Missing inquiry id");
+      const { error } = await supabase.from("inquiries").update({ status: "tour_scheduled" }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inquiry", id] });
     },
   });
 
@@ -154,11 +169,26 @@ export default function LeadDetail() {
 
         <SupabaseNotice title="Supabase not configured for inquiries." />
 
-        <div className="rounded-xl border border-border bg-card p-5 shadow-card">
-          <h2 className="text-lg font-semibold text-foreground">Inquiry Overview</h2>
-          <p className="text-sm text-muted-foreground">
-            {inquiry?.full_name ?? "Inquiry"} • {inquiry?.email ?? "No email"} • {inquiry?.phone ?? "No phone"}
-          </p>
+        <div className="rounded-xl border border-border bg-card p-5 shadow-card space-y-3">
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">Inquiry Overview</h2>
+            <p className="text-sm text-muted-foreground">
+              {inquiry?.full_name ?? "Inquiry"} • {inquiry?.email ?? "No email"} • {inquiry?.phone ?? "No phone"}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              className="rounded-lg border border-border px-3 py-2 text-xs font-semibold text-muted-foreground"
+              onClick={() => markTourMutation.mutate()}
+              disabled={!supabaseConfigured || markTourMutation.isPending}
+            >
+              {markTourMutation.isPending ? "Updating..." : "Mark Tour Scheduled"}
+            </button>
+            {inquiry?.status && (
+              <span className="text-xs text-muted-foreground">Status: {inquiry.status}</span>
+            )}
+          </div>
         </div>
 
         <div className="rounded-xl border border-border bg-card p-5 shadow-card space-y-4">
@@ -252,6 +282,14 @@ export default function LeadDetail() {
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-3">
+            <label className="flex items-center gap-2 text-xs text-muted-foreground">
+              <input
+                type="checkbox"
+                checked={autoSendContract}
+                onChange={(event) => setAutoSendContract(event.target.checked)}
+              />
+              Auto-send contract email after creation
+            </label>
             <button
               type="button"
               className={`rounded-lg px-4 py-2 text-sm font-semibold ${

@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import type { Tables } from "@/types/supabase";
 import { format, addDays, isAfter } from "date-fns";
+import { sendPaymentReminders } from "@/lib/payments/service";
 
 type Booking = Tables<"bookings">;
 type Schedule = Tables<"payment_schedule">;
@@ -156,6 +157,19 @@ export default function BookingDetail() {
       toast({ title: "Cancel failed", description: error.message, variant: "destructive" }),
   });
 
+  const remindersMutation = useMutation({
+    mutationFn: async () => {
+      if (!id) throw new Error("Missing booking id");
+      return sendPaymentReminders({ bookingId: id, windowDays: 7 });
+    },
+    onSuccess: (result) => {
+      toast({ title: "Reminders sent", description: `${result.sent} reminder(s) sent.` });
+    },
+    onError: (error) => {
+      toast({ title: "Reminder failed", description: error.message, variant: "destructive" });
+    },
+  });
+
   if (bookingLoading) {
     return (
       <AppLayout>
@@ -189,7 +203,7 @@ export default function BookingDetail() {
         {!supabaseConfigured && <SupabaseNotice title="Supabase not configured. Data may not load." />}
 
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
           <Link to="/" className="hover:text-primary">
             Home
           </Link>
@@ -199,6 +213,15 @@ export default function BookingDetail() {
           </Link>
           <span>//</span>
           <span>{booking.id}</span>
+          <div className="flex-1" />
+          <button
+            type="button"
+            className="rounded-lg border border-border px-3 py-2 text-xs font-semibold text-muted-foreground"
+            onClick={() => remindersMutation.mutate()}
+            disabled={remindersMutation.isPending}
+          >
+            {remindersMutation.isPending ? "Sending..." : "Send payment reminders"}
+          </button>
         </div>
 
         {/* Header */}
