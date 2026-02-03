@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { generateContractHtml } from "@/lib/contracts/template";
 import { getContract, generateContractPDF, markContractViewed, signContract } from "@/lib/contracts/service";
+import { showError } from "@/lib/error-handler";
 
 type ContractRow = Awaited<ReturnType<typeof getContract>>;
 
@@ -126,11 +127,18 @@ export default function ContractSign() {
   const [ipAddress, setIpAddress] = useState<string | undefined>();
   const pdfContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const { data: contract, isLoading } = useQuery({
+  const { data: contract, isLoading, error: contractError } = useQuery({
     queryKey: ["contract", contractId],
     queryFn: () => getContract(contractId as string),
     enabled: Boolean(contractId),
   });
+
+  // Handle query errors
+  useEffect(() => {
+    if (contractError) {
+      showError(contractError, "Failed to load contract");
+    }
+  }, [contractError]);
 
   useEffect(() => {
     if (!contract) return;
@@ -166,6 +174,9 @@ export default function ContractSign() {
     },
     onSuccess: () => {
       navigate(`/contract/success/${contractId}`);
+    },
+    onError: (error: unknown) => {
+      showError(error, "Failed to sign contract");
     },
   });
 

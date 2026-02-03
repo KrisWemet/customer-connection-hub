@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppLayout } from "@/components/AppLayout";
 import { EntityTable } from "@/components/EntityTable";
 import { SupabaseNotice } from "@/components/SupabaseNotice";
+import { TableSkeleton } from "@/components/TableSkeleton";
 import { integrationConfig } from "@/lib/integrations/config";
 import { supabase, supabaseConfigured } from "@/lib/supabase/client";
 import type { Tables } from "@/types/supabase";
-import { applyMergeFields, MERGE_FIELDS } from "@/lib/messaging/mergeFields";
+import { showError, showSuccess } from "@/lib/error-handler";
 
 const inputClassName =
   "w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20";
@@ -19,23 +20,8 @@ export default function Communications() {
     subject: "",
     body: "",
   });
-  const [selectedTemplate, setSelectedTemplate] = useState("");
-  const [mergeValues, setMergeValues] = useState<Record<string, string>>({
-    client_name: "",
-    client_email: "",
-    event_date: "",
-    event_start_date: "",
-    event_end_date: "",
-    booking_id: "",
-    invoice_amount: "",
-    payment_amount: "",
-    payment_due_date: "",
-    tour_date: "",
-    tour_time: "",
-    venue_name: "",
-  });
 
-  const { data = [] } = useQuery({
+  const { data = [], error: communicationsError, isLoading } = useQuery({
     queryKey: ["communication_logs"],
     queryFn: async () => {
       if (!supabaseConfigured) {
@@ -52,22 +38,12 @@ export default function Communications() {
     },
   });
 
-  const { data: templates = [] } = useQuery({
-    queryKey: ["templates"],
-    queryFn: async () => {
-      if (!supabaseConfigured) {
-        return [] as Tables<"templates">[];
-      }
-      const { data: rows, error } = await supabase
-        .from("templates")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (error) {
-        throw error;
-      }
-      return rows ?? [];
-    },
-  });
+  // Handle query errors
+  useEffect(() => {
+    if (communicationsError) {
+      showError(communicationsError, "Failed to load communications");
+    }
+  }, [communicationsError]);
 
   const createLog = useMutation({
     mutationFn: async () => {
@@ -87,6 +63,10 @@ export default function Communications() {
     onSuccess: () => {
       setFormState({ channel: "note", direction: "outbound", subject: "", body: "" });
       queryClient.invalidateQueries({ queryKey: ["communication_logs"] });
+      showSuccess("Communication logged successfully");
+    },
+    onError: (error: unknown) => {
+      showError(error, "Failed to log communication");
     },
   });
 
@@ -130,11 +110,8 @@ export default function Communications() {
           </div>
         </div>
 
-        <div className="mb-6 rounded-xl border border-border bg-card p-5 shadow-card space-y-4">
-          <div>
-            <h2 className="text-lg font-semibold text-foreground">Log Communication</h2>
-            <p className="text-sm text-muted-foreground">Pick a template and apply merge fields before logging.</p>
-          </div>
+        <div className="mb-6 rounded-xl border border-border bg-card p-5 shadow-card">
+          <h2 className="mb-4 text-lg font-semibold text-foreground">Log Communication</h2>
           <form
             className="grid gap-4 md:grid-cols-2"
             onSubmit={(event) => {
@@ -145,62 +122,9 @@ export default function Communications() {
               createLog.mutate();
             }}
           >
-            <select
-              className={inputClassName}
-              value={selectedTemplate}
-              onChange={(event) => {
-                const templateId = event.target.value;
-                setSelectedTemplate(templateId);
-                const template = templates.find((row) => row.id === templateId);
-                if (template) {
-                  setFormState((prev) => ({
-                    ...prev,
-                    channel: template.type === "sms" ? "sms" : "email",
-                    subject: template.subject ?? "",
-                    body: template.body ?? "",
-                  }));
-                }
-              }}
-            >
-              <option value="">Select a template (optional)</option>
-              {templates.map((template) => (
-                <option key={template.id} value={template.id}>
-                  {template.name}
-                </option>
-              ))}
-            </select>
-            <div className="grid grid-cols-2 gap-2">
-              {MERGE_FIELDS.map((field) => (
-                <input
-                  key={field}
-                  className={inputClassName}
-                  placeholder={field}
-                  value={mergeValues[field] ?? ""}
-                  onChange={(event) => setMergeValues({ ...mergeValues, [field]: event.target.value })}
-                />
-              ))}
-            </div>
-            <p className="md:col-span-2 text-xs text-muted-foreground">
-              Merge fields: {MERGE_FIELDS.map((field) => `{{${field}}}`).join(", ")}
-            </p>
-            <div className="md:col-span-2">
-              <button
-                type="button"
-                className="rounded-lg border border-border px-4 py-2 text-xs font-semibold text-muted-foreground"
-                onClick={() => {
-                  setFormState((prev) => ({
-                    ...prev,
-                    subject: applyMergeFields(prev.subject, mergeValues),
-                    body: applyMergeFields(prev.body, mergeValues),
-                  }));
-                }}
-              >
-                Apply merge fields
-              </button>
-            </div>
             <input
               className={inputClassName}
-              placeholder="Channel (sms/email/note)"
+              placeholder="Channel (sms/email/call/note)"
               value={formState.channel}
               onChange={(event) => setFormState({ ...formState, channel: event.target.value })}
               required
@@ -236,17 +160,21 @@ export default function Communications() {
           </form>
         </div>
 
-        <EntityTable
-          columns={[
-            { header: "Channel", cell: (row) => row.channel },
-            { header: "Direction", cell: (row) => row.direction },
-            { header: "Subject", cell: (row) => row.subject ?? "-" },
-            { header: "Status", cell: (row) => row.status ?? "-" },
-            { header: "Sent", cell: (row) => row.sent_at ?? row.created_at ?? "-" },
-          ]}
-          data={data}
-          emptyMessage="No communications logged yet."
-        />
+        {isLoading ? (
+          <TableSkeleton rows={5} columns={5} />
+        ) : (
+          <EntityTable
+            columns={[
+              { header: "Channel", cell: (row) => row.channel },
+              { header: "Direction", cell: (row) => row.direction },
+              { header: "Subject", cell: (row) => row.subject ?? "-" },
+              { header: "Status", cell: (row) => row.status ?? "-" },
+              { header: "Sent", cell: (row) => row.sent_at ?? row.created_at ?? "-" },
+            ]}
+            data={data}
+            emptyMessage="No communications logged yet."
+          />
+        )}
       </div>
     </AppLayout>
   );

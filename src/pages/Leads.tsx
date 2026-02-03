@@ -282,65 +282,89 @@ export default function Leads() {
                 createInquiry.mutate();
               }}
             >
-              <input
-                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                placeholder="Full name"
-                value={formState.full_name}
-                onChange={(event) => setFormState({ ...formState, full_name: event.target.value })}
-              />
-              <input
-                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                placeholder="Email"
-                type="email"
-                value={formState.email}
-                onChange={(event) => setFormState({ ...formState, email: event.target.value })}
-              />
-              <input
-                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                placeholder="Phone"
-                value={formState.phone}
-                onChange={(event) => setFormState({ ...formState, phone: event.target.value })}
-              />
-              <input
-                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                placeholder="Source (website, Instagram, referral)"
-                value={formState.source}
-                onChange={(event) => setFormState({ ...formState, source: event.target.value })}
-              />
-              <input
-                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                placeholder="Event start date"
-                type="date"
-                value={formState.event_start_date}
-                onChange={(event) => setFormState({ ...formState, event_start_date: event.target.value })}
-              />
-              <input
-                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                placeholder="Estimated guest count"
-                type="number"
-                min={0}
-                value={formState.estimated_guest_count}
-                onChange={(event) => setFormState({ ...formState, estimated_guest_count: event.target.value })}
-              />
-              <select
-                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                value={formState.status}
-                onChange={(event) => setFormState({ ...formState, status: event.target.value as Inquiry["status"] })}
-              >
-                <option value="inquiry">New inquiry</option>
-                <option value="contacted">Contacted</option>
-                <option value="tour_scheduled">Tour scheduled</option>
-                <option value="proposal_sent">Proposal sent</option>
-                <option value="booked">Booked</option>
-                <option value="declined">Declined</option>
-                <option value="hold">Hold</option>
-              </select>
-              <input
-                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                placeholder="Notes"
-                value={formState.notes}
-                onChange={(event) => setFormState({ ...formState, notes: event.target.value })}
-              />
+              <div className="space-y-1">
+                <input
+                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  placeholder="Full name"
+                  value={formState.full_name}
+                  onChange={(event) => setFormState({ ...formState, full_name: event.target.value })}
+                />
+                <p className="text-xs text-muted-foreground">Couple name(s) as you want it saved.</p>
+              </div>
+              <div className="space-y-1">
+                <input
+                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  placeholder="Email"
+                  type="email"
+                  value={formState.email}
+                  onChange={(event) => setFormState({ ...formState, email: event.target.value })}
+                />
+                <p className="text-xs text-muted-foreground">Primary contact email.</p>
+              </div>
+              <div className="space-y-1">
+                <input
+                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  placeholder="Phone"
+                  value={formState.phone}
+                  onChange={(event) => setFormState({ ...formState, phone: event.target.value })}
+                />
+                <p className="text-xs text-muted-foreground">Best number for texts/calls.</p>
+              </div>
+              <div className="space-y-1">
+                <input
+                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  placeholder="Source (website, Instagram, referral)"
+                  value={formState.source}
+                  onChange={(event) => setFormState({ ...formState, source: event.target.value })}
+                />
+                <p className="text-xs text-muted-foreground">Where they heard about Rustic Retreat.</p>
+              </div>
+              <div className="space-y-1">
+                <input
+                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  placeholder="Event start date"
+                  type="date"
+                  value={formState.event_start_date}
+                  onChange={(event) => setFormState({ ...formState, event_start_date: event.target.value })}
+                />
+                <p className="text-xs text-muted-foreground">Date the event begins (estimate ok).</p>
+              </div>
+              <div className="space-y-1">
+                <input
+                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  placeholder="Estimated guest count"
+                  type="number"
+                  min={0}
+                  value={formState.estimated_guest_count}
+                  onChange={(event) => setFormState({ ...formState, estimated_guest_count: event.target.value })}
+                />
+                <p className="text-xs text-muted-foreground">Rough headcount estimate.</p>
+              </div>
+              <div className="space-y-1">
+                <select
+                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  value={formState.status}
+                  onChange={(event) => setFormState({ ...formState, status: event.target.value as Inquiry["status"] })}
+                >
+                  <option value="inquiry">New inquiry</option>
+                  <option value="contacted">Contacted</option>
+                  <option value="tour_scheduled">Tour scheduled</option>
+                  <option value="proposal_sent">Proposal sent</option>
+                  <option value="booked">Booked</option>
+                  <option value="declined">Declined</option>
+                  <option value="hold">Hold</option>
+                </select>
+                <p className="text-xs text-muted-foreground">Current stage in the pipeline.</p>
+              </div>
+              <div className="space-y-1">
+                <input
+                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  placeholder="Notes"
+                  value={formState.notes}
+                  onChange={(event) => setFormState({ ...formState, notes: event.target.value })}
+                />
+                <p className="text-xs text-muted-foreground">Important details or special requests.</p>
+              </div>
               <div className="md:col-span-2">
                 <button
                   type="submit"

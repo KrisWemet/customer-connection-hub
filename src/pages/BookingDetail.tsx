@@ -259,6 +259,16 @@ export default function BookingDetail() {
                   View Contract
                 </Button>
               )}
+              <Button variant="secondary" asChild>
+                <Link to={`/bookings/${booking.id}/timeline`}>
+                  Multi-Day Timeline
+                </Link>
+              </Button>
+              <Button variant="secondary" asChild>
+                <Link to={`/bookings/${booking.id}/day-of`}>
+                  Day-of Coordination
+                </Link>
+              </Button>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-4 text-sm">

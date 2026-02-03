@@ -3,6 +3,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Dashboard from "./pages/Dashboard";
 import Leads from "./pages/Leads";
 import ClientPortal from "./pages/ClientPortal";
@@ -23,45 +26,155 @@ import AdminSettings from "./pages/AdminSettings";
 import LeadDetail from "./pages/LeadDetail";
 import DamageDeposits from "./pages/DamageDeposits";
 import BookingDetail from "./pages/BookingDetail";
+import MultiDayTimeline from "./pages/MultiDayTimeline";
+import DayOfCoordination from "./pages/DayOfCoordination";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Unauthorized from "./pages/Unauthorized";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
+
+// Note: Error handling is now done at the component level using the error state
+// from useQuery/useMutation hooks, or using error boundaries.
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter
-        future={{
-          v7_startTransition: true,
-          v7_relativeSplatPath: true,
-        }}
-      >
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/leads" element={<Leads />} />
-          <Route path="/leads/:id" element={<LeadDetail />} />
-          <Route path="/tours" element={<Tours />} />
-          <Route path="/events" element={<Bookings />} />
-          <Route path="/bookings/:id" element={<BookingDetail />} />
-          <Route path="/calendars" element={<Calendars />} />
-          <Route path="/contacts" element={<Contacts />} />
-          <Route path="/messages" element={<Messages />} />
-          <Route path="/proposals" element={<Proposals />} />
-          <Route path="/invoices" element={<Invoices />} />
-          <Route path="/contracts" element={<Contracts />} />
-          <Route path="/contract/sign/:contractId" element={<ContractSign />} />
-          <Route path="/contract/success/:contractId" element={<ContractSuccess />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/templates" element={<Templates />} />
-          <Route path="/admin/settings" element={<AdminSettings />} />
-          <Route path="/damage-deposits" element={<DamageDeposits />} />
-          <Route path="/portal" element={<ClientPortal />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
+        >
+          <ErrorBoundary>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/unauthorized" element={<Unauthorized />} />
+              <Route path="/contract/sign/:contractId" element={<ContractSign />} />
+              <Route path="/contract/success/:contractId" element={<ContractSuccess />} />
+
+              {/* Admin protected routes */}
+              <Route path="/" element={
+                <ProtectedRoute requiredRole="admin">
+                  <Dashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/leads" element={
+                <ProtectedRoute requiredRole="admin">
+                  <Leads />
+                </ProtectedRoute>
+              } />
+              <Route path="/leads/:id" element={
+                <ProtectedRoute requiredRole="admin">
+                  <LeadDetail />
+                </ProtectedRoute>
+              } />
+              <Route path="/tours" element={
+                <ProtectedRoute requiredRole="admin">
+                  <Tours />
+                </ProtectedRoute>
+              } />
+              <Route path="/events" element={
+                <ProtectedRoute requiredRole="admin">
+                  <Bookings />
+                </ProtectedRoute>
+              } />
+              <Route path="/bookings/:id" element={
+                <ProtectedRoute requiredRole="admin">
+                  <BookingDetail />
+                </ProtectedRoute>
+              } />
+              <Route path="/calendars" element={
+                <ProtectedRoute requiredRole="admin">
+                  <Calendars />
+                </ProtectedRoute>
+              } />
+              <Route path="/contacts" element={
+                <ProtectedRoute requiredRole="admin">
+                  <Contacts />
+                </ProtectedRoute>
+              } />
+              <Route path="/messages" element={
+                <ProtectedRoute requiredRole="admin">
+                  <Messages />
+                </ProtectedRoute>
+              } />
+              <Route path="/proposals" element={
+                <ProtectedRoute requiredRole="admin">
+                  <Proposals />
+                </ProtectedRoute>
+              } />
+              <Route path="/invoices" element={
+                <ProtectedRoute requiredRole="admin">
+                  <Invoices />
+                </ProtectedRoute>
+              } />
+              <Route path="/contracts" element={
+                <ProtectedRoute requiredRole="admin">
+                  <Contracts />
+                </ProtectedRoute>
+              } />
+              <Route path="/reports" element={
+                <ProtectedRoute requiredRole="admin">
+                  <Reports />
+                </ProtectedRoute>
+              } />
+              <Route path="/templates" element={
+                <ProtectedRoute requiredRole="admin">
+                  <Templates />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/settings" element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminSettings />
+                </ProtectedRoute>
+              } />
+              <Route path="/damage-deposits" element={
+                <ProtectedRoute requiredRole="admin">
+                  <DamageDeposits />
+                </ProtectedRoute>
+              } />
+
+              {/* Multi-day event routes */}
+              <Route path="/bookings/:id/timeline" element={
+                <ProtectedRoute requiredRole="admin">
+                  <MultiDayTimeline />
+                </ProtectedRoute>
+              } />
+              <Route path="/bookings/:id/day-of" element={
+                <ProtectedRoute requiredRole="admin">
+                  <DayOfCoordination />
+                </ProtectedRoute>
+              } />
+
+              {/* Client protected routes */}
+              <Route path="/portal" element={
+                <ProtectedRoute requiredRole="client">
+                  <ClientPortal />
+                </ProtectedRoute>
+              } />
+
+              {/* Catch-all route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </ErrorBoundary>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

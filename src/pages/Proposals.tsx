@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppLayout } from "@/components/AppLayout";
 import { EntityTable } from "@/components/EntityTable";
 import { SupabaseNotice } from "@/components/SupabaseNotice";
+import { TableSkeleton } from "@/components/TableSkeleton";
 import { supabase, supabaseConfigured } from "@/lib/supabase/client";
 import type { Tables } from "@/types/supabase";
+import { showError, showSuccess } from "@/lib/error-handler";
 
 const inputClassName =
   "w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20";
@@ -17,7 +19,7 @@ export default function Proposals() {
     total_amount: "",
   });
 
-  const { data = [] } = useQuery({
+  const { data = [], error: proposalsError, isLoading } = useQuery({
     queryKey: ["proposals"],
     queryFn: async () => {
       if (!supabaseConfigured) {
@@ -34,6 +36,13 @@ export default function Proposals() {
     },
   });
 
+  // Handle query errors
+  useEffect(() => {
+    if (proposalsError) {
+      showError(proposalsError, "Failed to load proposals");
+    }
+  }, [proposalsError]);
+
   const createProposal = useMutation({
     mutationFn: async () => {
       const payload = {
@@ -49,6 +58,10 @@ export default function Proposals() {
     onSuccess: () => {
       setFormState({ title: "", status: "draft", total_amount: "" });
       queryClient.invalidateQueries({ queryKey: ["proposals"] });
+      showSuccess("Proposal created successfully");
+    },
+    onError: (error: unknown) => {
+      showError(error, "Failed to create proposal");
     },
   });
 
@@ -111,16 +124,20 @@ export default function Proposals() {
           </form>
         </div>
 
-        <EntityTable
-          columns={[
-            { header: "Title", cell: (row) => row.title ?? "-" },
-            { header: "Status", cell: (row) => row.status },
-            { header: "Total", cell: (row) => (row.total_amount ? `$${row.total_amount.toFixed(2)}` : "-") },
-            { header: "Created", cell: (row) => row.created_at ?? "-" },
-          ]}
-          data={data}
-          emptyMessage="No proposals yet. Add your first proposal above."
-        />
+        {isLoading ? (
+          <TableSkeleton rows={5} columns={4} />
+        ) : (
+          <EntityTable
+            columns={[
+              { header: "Title", cell: (row) => row.title ?? "-" },
+              { header: "Status", cell: (row) => row.status },
+              { header: "Total", cell: (row) => (row.total_amount ? `$${row.total_amount.toFixed(2)}` : "-") },
+              { header: "Created", cell: (row) => row.created_at ?? "-" },
+            ]}
+            data={data}
+            emptyMessage="No proposals yet. Add your first proposal above."
+          />
+        )}
       </div>
     </AppLayout>
   );

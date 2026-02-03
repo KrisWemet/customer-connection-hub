@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { SupabaseNotice } from "@/components/SupabaseNotice";
+import { BookingsSkeleton } from "@/components/BookingsSkeleton";
 import { supabase, supabaseConfigured } from "@/lib/supabase/client";
 import { createBooking } from "@/lib/bookings/service";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -50,7 +51,7 @@ export default function Bookings() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const { data: bookings = [] } = useQuery({
+  const { data: bookings = [], isLoading } = useQuery({
     queryKey: ["bookings"],
     queryFn: async () => {
       if (!supabaseConfigured) return [] as Tables<"bookings">[];
@@ -129,6 +130,14 @@ export default function Bookings() {
       });
     },
   });
+
+  if (isLoading) {
+    return (
+      <AppLayout>
+        <BookingsSkeleton />
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>

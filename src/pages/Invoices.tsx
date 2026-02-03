@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppLayout } from "@/components/AppLayout";
 import { EntityTable } from "@/components/EntityTable";
 import { SupabaseNotice } from "@/components/SupabaseNotice";
+import { TableSkeleton } from "@/components/TableSkeleton";
 import { supabase, supabaseConfigured } from "@/lib/supabase/client";
 import type { Tables } from "@/types/supabase";
+import { showError, showSuccess } from "@/lib/error-handler";
 
 const inputClassName =
   "w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20";
@@ -17,7 +19,7 @@ export default function Invoices() {
     due_date: "",
   });
 
-  const { data = [] } = useQuery({
+  const { data = [], error: invoicesError, isLoading } = useQuery({
     queryKey: ["invoices"],
     queryFn: async () => {
       if (!supabaseConfigured) {
@@ -34,6 +36,13 @@ export default function Invoices() {
     },
   });
 
+  // Handle query errors
+  useEffect(() => {
+    if (invoicesError) {
+      showError(invoicesError, "Failed to load invoices");
+    }
+  }, [invoicesError]);
+
   const createInvoice = useMutation({
     mutationFn: async () => {
       const payload = {
@@ -49,6 +58,10 @@ export default function Invoices() {
     onSuccess: () => {
       setFormState({ status: "draft", amount: "", due_date: "" });
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      showSuccess("Invoice created successfully");
+    },
+    onError: (error: unknown) => {
+      showError(error, "Failed to create invoice");
     },
   });
 
@@ -111,16 +124,20 @@ export default function Invoices() {
           </form>
         </div>
 
-        <EntityTable
-          columns={[
-            { header: "Status", cell: (row) => row.status },
-            { header: "Amount", cell: (row) => `$${row.amount.toFixed(2)}` },
-            { header: "Due", cell: (row) => row.due_date ?? "-" },
-            { header: "Paid", cell: (row) => row.paid_at ?? "-" },
-          ]}
-          data={data}
-          emptyMessage="No invoices yet. Add your first invoice above."
-        />
+        {isLoading ? (
+          <TableSkeleton rows={5} columns={4} />
+        ) : (
+          <EntityTable
+            columns={[
+              { header: "Status", cell: (row) => row.status },
+              { header: "Amount", cell: (row) => `$${row.amount.toFixed(2)}` },
+              { header: "Due", cell: (row) => row.due_date ?? "-" },
+              { header: "Paid", cell: (row) => row.paid_at ?? "-" },
+            ]}
+            data={data}
+            emptyMessage="No invoices yet. Add your first invoice above."
+          />
+        )}
       </div>
     </AppLayout>
   );

@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { TableSkeleton } from "@/components/TableSkeleton";
 
 export interface Column<T> {
   header: string;
@@ -11,9 +12,19 @@ interface EntityTableProps<T> {
   columns: Column<T>[];
   data: T[];
   emptyMessage?: string;
+  isLoading?: boolean;
 }
 
-export function EntityTable<T>({ columns, data, emptyMessage = "No records yet." }: EntityTableProps<T>) {
+export function EntityTable<T>({
+  columns,
+  data,
+  emptyMessage = "No records yet.",
+  isLoading = false,
+}: EntityTableProps<T>) {
+  if (isLoading) {
+    return <TableSkeleton rows={5} columns={columns.length} />;
+  }
+
   if (data.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-border bg-card/30 p-6 text-sm text-muted-foreground">

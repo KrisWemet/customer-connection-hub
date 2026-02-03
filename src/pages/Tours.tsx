@@ -5,8 +5,10 @@ import { Calendar as CalendarIcon, CheckCircle2, ClipboardList, XCircle } from "
 import { AppLayout } from "@/components/AppLayout";
 import { SupabaseNotice } from "@/components/SupabaseNotice";
 import { Calendar } from "@/components/ui/calendar";
+import { ToursSkeleton } from "@/components/ToursSkeleton";
 import { cn } from "@/lib/utils";
 import { supabase, supabaseConfigured } from "@/lib/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 type Inquiry = {
   id: string;
@@ -72,6 +74,7 @@ function combineDateTime(date: string, time: string) {
 
 export default function Tours() {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const formRef = useRef<HTMLDivElement | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [statusFilter, setStatusFilter] = useState<"all" | Tour["status"]>("all");
@@ -91,7 +94,7 @@ export default function Tours() {
     followUpSent: false,
   });
 
-  const { data: inquiries = [] } = useQuery({
+  const { data: inquiries = [], error: inquiriesError } = useQuery({
     queryKey: ["inquiries"],
     queryFn: async () => {
       if (!supabaseConfigured) return [] as Inquiry[];
@@ -101,7 +104,7 @@ export default function Tours() {
     },
   });
 
-  const { data: tours = [], isLoading: toursLoading } = useQuery({
+  const { data: tours = [], isLoading: toursLoading, error: toursError } = useQuery({
     queryKey: ["tours"],
     queryFn: async () => {
       if (!supabaseConfigured) return [] as Tour[];
@@ -115,7 +118,7 @@ export default function Tours() {
     },
   });
 
-  const { data: bookings = [] } = useQuery({
+  const { data: bookings = [], error: bookingsError } = useQuery({
     queryKey: ["bookings"],
     queryFn: async () => {
       if (!supabaseConfigured) return [] as Booking[];
@@ -127,6 +130,31 @@ export default function Tours() {
       return (data ?? []) as Booking[];
     },
   });
+
+  // Handle query errors
+  useEffect(() => {
+    if (toursError) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: toursError instanceof Error ? toursError.message : "Failed to load tours",
+      });
+    }
+    if (inquiriesError) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: inquiriesError instanceof Error ? inquiriesError.message : "Failed to load inquiries",
+      });
+    }
+    if (bookingsError) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: bookingsError instanceof Error ? bookingsError.message : "Failed to load bookings",
+      });
+    }
+  }, [toursError, inquiriesError, bookingsError, toast]);
 
   const createTourMutation = useMutation({
     mutationFn: async () => {
@@ -149,6 +177,17 @@ export default function Tours() {
         attendees: [],
       });
       queryClient.invalidateQueries({ queryKey: ["tours"] });
+      toast({
+        title: "Success",
+        description: "Tour scheduled successfully",
+      });
+    },
+    onError: (error: unknown) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to schedule tour",
+      });
     },
   });
 
@@ -160,6 +199,17 @@ export default function Tours() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tours"] });
+      toast({
+        title: "Success",
+        description: "Tour updated successfully",
+      });
+    },
+    onError: (error: unknown) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update tour",
+      });
     },
   });
 
@@ -214,6 +264,14 @@ export default function Tours() {
 
   const canSchedule =
     scheduleForm.inquiryId && scheduleForm.tourDate && scheduleForm.tourTime && supabaseConfigured;
+
+  if (toursLoading) {
+    return (
+      <AppLayout>
+        <ToursSkeleton />
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>
@@ -354,10 +412,7 @@ export default function Tours() {
                   ))}
                 </div>
               </div>
-              {toursLoading ? (
-                <p className="text-sm text-muted-foreground">Loading tours...</p>
-              ) : (
-                <div className="space-y-6">
+              <div className="space-y-6">
                   <div>
                     <h3 className="mb-3 text-sm font-semibold text-foreground">Upcoming</h3>
                     <div className="space-y-3">
@@ -443,7 +498,6 @@ export default function Tours() {
                     </div>
                   </div>
                 </div>
-              )}
             </div>
           </div>
 

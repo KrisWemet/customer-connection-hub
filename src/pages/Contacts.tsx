@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppLayout } from "@/components/AppLayout";
 import { EntityTable } from "@/components/EntityTable";
 import { SupabaseNotice } from "@/components/SupabaseNotice";
+import { TableSkeleton } from "@/components/TableSkeleton";
 import { supabase, supabaseConfigured } from "@/lib/supabase/client";
 import type { Tables } from "@/types/supabase";
+import { showError, showSuccess } from "@/lib/error-handler";
 
 const inputClassName =
   "w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20";
@@ -19,7 +21,7 @@ export default function Contacts() {
     notes: "",
   });
 
-  const { data = [] } = useQuery({
+  const { data = [], error: contactsError, isLoading } = useQuery({
     queryKey: ["contacts"],
     queryFn: async () => {
       if (!supabaseConfigured) {
@@ -35,6 +37,13 @@ export default function Contacts() {
       return rows ?? [];
     },
   });
+
+  // Handle query errors
+  useEffect(() => {
+    if (contactsError) {
+      showError(contactsError, "Failed to load contacts");
+    }
+  }, [contactsError]);
 
   const createContact = useMutation({
     mutationFn: async () => {
@@ -59,6 +68,10 @@ export default function Contacts() {
         notes: "",
       });
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
+      showSuccess("Contact created successfully");
+    },
+    onError: (error: unknown) => {
+      showError(error, "Failed to create contact");
     },
   });
 
@@ -136,17 +149,21 @@ export default function Contacts() {
           </form>
         </div>
 
-        <EntityTable
-          columns={[
-            { header: "Name", cell: (row) => row.full_name },
-            { header: "Email", cell: (row) => row.email ?? "-" },
-            { header: "Phone", cell: (row) => row.phone ?? "-" },
-            { header: "Organization", cell: (row) => row.organization ?? "-" },
-            { header: "Role", cell: (row) => row.role ?? "-" },
-          ]}
-          data={data}
-          emptyMessage="No contacts yet. Add your first contact above."
-        />
+        {isLoading ? (
+          <TableSkeleton rows={5} columns={5} />
+        ) : (
+          <EntityTable
+            columns={[
+              { header: "Name", cell: (row) => row.full_name },
+              { header: "Email", cell: (row) => row.email ?? "-" },
+              { header: "Phone", cell: (row) => row.phone ?? "-" },
+              { header: "Organization", cell: (row) => row.organization ?? "-" },
+              { header: "Role", cell: (row) => row.role ?? "-" },
+            ]}
+            data={data}
+            emptyMessage="No contacts yet. Add your first contact above."
+          />
+        )}
       </div>
     </AppLayout>
   );

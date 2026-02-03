@@ -1,35 +1,61 @@
 import { AppLayout } from "@/components/AppLayout";
 import { ActivityChart } from "@/components/ActivityChart";
 import { DonutChart } from "@/components/DonutChart";
-import { 
-  Calendar, 
-  AlertTriangle, 
+import {
+  Calendar,
+  AlertTriangle,
   Clock,
   RefreshCw,
   RotateCcw
 } from "lucide-react";
 import { StatusCard } from "@/components/StatusCard";
-
-const upcomingData = [
-  { name: "Upcoming Bookings", value: 2, color: "#3B82F6" },
-  { name: "Tours/Calls", value: 3, color: "#60A5FA" },
-  { name: "Payment Milestones", value: 2, color: "#93C5FD" },
-  { name: "Checklist Items", value: 6, color: "#BFDBFE" },
-  { name: "Vendor Documents", value: 4, color: "#DBEAFE" },
-];
-
-const overdueData = [
-  { name: "Payments", value: 2, color: "#EF4444" },
-  { name: "Checklist Items", value: 4, color: "#F87171" },
-];
-
-const waitingData = [
-  { name: "Contract Signatures", value: 2, color: "#F59E0B" },
-  { name: "Questionnaires", value: 3, color: "#FBBF24" },
-  { name: "Vendor COIs", value: 2, color: "#FCD34D" },
-];
+import { useDashboardStats } from "@/hooks/useDashboardData";
+import { DashboardSkeleton } from "@/components/DashboardSkeleton";
+import { showError } from "@/lib/error-handler";
+import { useEffect } from "react";
 
 export default function Dashboard() {
+  const { stats, isLoading, error, upcomingBookings, overduePayments, pendingContracts, recentActivity } = useDashboardStats();
+
+  // Show error toast if data fetch fails
+  useEffect(() => {
+    if (error) {
+      showError(error, "Failed to load dashboard data");
+    }
+  }, [error]);
+
+  // Show loading skeleton while data is being fetched
+  if (isLoading) {
+    return (
+      <AppLayout>
+        <DashboardSkeleton />
+      </AppLayout>
+    );
+  }
+
+  // Calculate dynamic data for charts
+  const upcomingData = [
+    { name: "Upcoming Bookings", value: upcomingBookings.length, color: "#3B82F6" },
+    { name: "Tours/Calls", value: 0, color: "#60A5FA" }, // TODO: Add tours table
+    { name: "Payment Milestones", value: 0, color: "#93C5FD" }, // TODO: Calculate upcoming payments
+    { name: "Checklist Items", value: 0, color: "#BFDBFE" }, // TODO: Add checklist table
+    { name: "Vendor Documents", value: 0, color: "#DBEAFE" }, // TODO: Add documents table
+  ];
+
+  const overdueData = [
+    { name: "Payments", value: overduePayments.length, color: "#EF4444" },
+    { name: "Checklist Items", value: 0, color: "#F87171" }, // TODO: Add checklist table
+  ];
+
+  const waitingData = [
+    { name: "Contract Signatures", value: pendingContracts.length, color: "#F59E0B" },
+    { name: "Questionnaires", value: 0, color: "#FBBF24" }, // TODO: Add questionnaire table
+    { name: "Vendor COIs", value: 0, color: "#FCD34D" }, // TODO: Add vendor COI tracking
+  ];
+
+  const totalUpcoming = upcomingData.reduce((sum, item) => sum + item.value, 0);
+  const totalOverdue = overdueData.reduce((sum, item) => sum + item.value, 0);
+  const totalWaiting = waitingData.reduce((sum, item) => sum + item.value, 0);
   return (
     <AppLayout>
       <div className="p-8">
@@ -53,37 +79,39 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <DonutChart
             title="Upcoming"
-            count={28}
+            count={totalUpcoming}
             subtitle="Next 60 days ▾"
-            data={upcomingData}
-            items={[
-              { label: "2 Upcoming Bookings", dotColor: "#3B82F6" },
-              { label: "3 Tours/Calls", dotColor: "#60A5FA" },
-              { label: "2 Payment Milestones", dotColor: "#93C5FD" },
-              { label: "6 Checklist Items", dotColor: "#BFDBFE" },
-              { label: "4 Vendor Documents", dotColor: "#DBEAFE" },
-            ]}
+            data={upcomingData.filter(item => item.value > 0)}
+            items={upcomingData
+              .filter(item => item.value > 0)
+              .map(item => ({
+                label: `${item.value} ${item.name}`,
+                dotColor: item.color,
+              }))}
           />
           <DonutChart
             title="Overdue"
-            count={6}
+            count={totalOverdue}
             subtitle="Last 180 days ▾"
-            data={overdueData}
-            items={[
-              { label: "2 Payments", dotColor: "#EF4444" },
-              { label: "4 Checklist Items", dotColor: "#F87171" },
-            ]}
+            data={overdueData.filter(item => item.value > 0)}
+            items={overdueData
+              .filter(item => item.value > 0)
+              .map(item => ({
+                label: `${item.value} ${item.name}`,
+                dotColor: item.color,
+              }))}
           />
           <DonutChart
             title="Waiting"
-            count={8}
+            count={totalWaiting}
             subtitle="Last 180 days ▾"
-            data={waitingData}
-            items={[
-              { label: "2 Contract Signatures", dotColor: "#F59E0B" },
-              { label: "3 Questionnaires", dotColor: "#FBBF24" },
-              { label: "2 Vendor COIs", dotColor: "#FCD34D" },
-            ]}
+            data={waitingData.filter(item => item.value > 0)}
+            items={waitingData
+              .filter(item => item.value > 0)
+              .map(item => ({
+                label: `${item.value} ${item.name}`,
+                dotColor: item.color,
+              }))}
           />
         </div>
 
@@ -91,49 +119,43 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <StatusCard
             title="Recent Activity"
-            count={6}
+            count={stats.recentActivity}
             icon={RotateCcw}
             color="gray"
             items={[
-              { label: "INQUIRIES CAPTURED", count: 3 },
-              { label: "PAYMENTS RECEIVED ($3,250.00)", count: 1 },
-              { label: "PLANNING FORMS COMPLETED", count: 2 },
-              { label: "CONTRACT SIGNED", count: 1 },
+              { label: "NEW BOOKINGS", count: recentActivity.bookings.length },
+              {
+                label: `PAYMENTS RECEIVED (${overduePayments.length > 0 ? `$${overduePayments.reduce((sum, p) => sum + p.amount, 0).toFixed(2)}` : '$0.00'})`,
+                count: recentActivity.payments.length
+              },
             ]}
           />
           <StatusCard
             title="Overdue"
-            count={6}
+            count={stats.overduePayments}
             icon={AlertTriangle}
             color="danger"
-            items={[
-              { label: "CHECKLIST ITEMS OVERDUE", count: 3 },
-              { label: "PAYMENT 2 ($4,250.00)", count: 1 },
-              { label: "FINAL PAYMENT ($7,800.00)", count: 1 },
-              { label: "VENDOR COI REQUESTS", count: 1 },
-            ]}
+            items={overduePayments.slice(0, 4).map((payment, idx) => ({
+              label: `${payment.label.toUpperCase()} ($${payment.amount.toFixed(2)})`,
+              count: 1,
+            }))}
           />
           <StatusCard
             title="Waiting"
-            count={6}
+            count={stats.pendingContracts}
             icon={Clock}
             color="warning"
             items={[
-              { label: "CONTRACTS OUT FOR SIGNATURE", count: 2 },
-              { label: "PLANNING QUESTIONNAIRE", count: 1 },
-              { label: "PORTAL ACCOUNTS TO SET UP", count: 1 },
-              { label: "HOLD REVIEW EXPIRING", count: 2 },
+              { label: "CONTRACTS OUT FOR SIGNATURE", count: pendingContracts.length },
             ]}
           />
           <StatusCard
             title="Upcoming"
-            count={7}
+            count={stats.upcomingBookings}
             icon={Calendar}
             color="info"
             items={[
-              { label: "EVENT WEEKENDS", count: 2 },
-              { label: "SITE TOURS", count: 4 },
-              { label: "DEPOSIT DUE ($2,500.00)", count: 1 },
+              { label: "EVENT WEEKENDS", count: upcomingBookings.length },
             ]}
           />
         </div>

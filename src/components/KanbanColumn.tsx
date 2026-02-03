@@ -10,7 +10,7 @@ interface KanbanColumnProps {
 
 export function KanbanColumn({ title, count, leads }: KanbanColumnProps) {
   return (
-    <div className="bg-muted/50 rounded-xl min-w-[300px] flex flex-col">
+    <div className="bg-muted/50 rounded-xl flex-1 min-w-[280px] max-w-[400px] flex flex-col">
       <div className="p-4 border-b border-border/50">
         <div className="flex items-center gap-2">
           <Flag size={16} className="text-primary" />

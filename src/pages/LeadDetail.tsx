@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppLayout } from "@/components/AppLayout";
 import { SupabaseNotice } from "@/components/SupabaseNotice";
@@ -13,6 +13,7 @@ import { generateContractHtml } from "@/lib/contracts/template";
 import { sendMessage } from "@/lib/messaging/service";
 import { getTemplateByKey, renderTemplate } from "@/lib/messaging/templates";
 import { Link, useParams } from "react-router-dom";
+import { showError, showSuccess } from "@/lib/error-handler";
 
 export default function LeadDetail() {
   const { id } = useParams<{ id: string }>();
@@ -36,7 +37,7 @@ export default function LeadDetail() {
     tourNotes: "",
   });
 
-  const { data: inquiry } = useQuery({
+  const { data: inquiry, error: inquiryError } = useQuery({
     queryKey: ["inquiry", id],
     enabled: Boolean(id && supabaseConfigured),
     queryFn: async () => {
@@ -46,7 +47,7 @@ export default function LeadDetail() {
     },
   });
 
-  const { data: contracts = [] } = useQuery({
+  const { data: contracts = [], error: contractsError } = useQuery({
     queryKey: ["contracts", id],
     enabled: Boolean(id && supabaseConfigured),
     queryFn: async () => {
@@ -59,6 +60,16 @@ export default function LeadDetail() {
       return data ?? [];
     },
   });
+
+  // Handle query errors
+  useEffect(() => {
+    if (inquiryError) {
+      showError(inquiryError, "Failed to load inquiry");
+    }
+    if (contractsError) {
+      showError(contractsError, "Failed to load contracts");
+    }
+  }, [inquiryError, contractsError]);
 
   const createMutation = useMutation({
     mutationFn: async () => {
@@ -79,6 +90,10 @@ export default function LeadDetail() {
       if (autoSendContract && contract?.id) {
         sendMutation.mutate({ contractId: contract.id, method: "email" });
       }
+      showSuccess("Contract created successfully");
+    },
+    onError: (error: unknown) => {
+      showError(error, "Failed to create contract");
     },
   });
 
@@ -88,6 +103,10 @@ export default function LeadDetail() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contracts", id] });
+      showSuccess("Contract sent successfully");
+    },
+    onError: (error: unknown) => {
+      showError(error, "Failed to send contract");
     },
   });
 
@@ -95,6 +114,10 @@ export default function LeadDetail() {
     mutationFn: async (contractId: string) => cancelContract(contractId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contracts", id] });
+      showSuccess("Contract cancelled");
+    },
+    onError: (error: unknown) => {
+      showError(error, "Failed to cancel contract");
     },
   });
 

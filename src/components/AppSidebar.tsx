@@ -18,10 +18,12 @@ import {
   Settings,
   ShieldCheck,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  LogOut
 } from "lucide-react";
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navigationItems = [
   { name: "Dashboard", href: "/", icon: Home },
@@ -41,9 +43,15 @@ const navigationItems = [
   { name: "Client Portal", href: "/portal", icon: UserCircle },
 ];
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  onNavigate?: () => void;
+}
+
+export function AppSidebar({ onNavigate }: AppSidebarProps = {}) {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   const { data: threads = [] } = useQuery({
     queryKey: ["message_threads"],
     queryFn: async () => {
@@ -83,15 +91,15 @@ export function AppSidebar() {
           collapsed && "justify-center"
         )}>
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-semibold text-sm">
-            SR
+            {user?.name ? getInitials(user.name) : user?.email.substring(0, 2).toUpperCase()}
           </div>
           {!collapsed && (
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-sidebar-foreground truncate">
-                Shannon Ouimet
+                {user?.name || user?.email}
               </p>
               <p className="text-xs text-sidebar-foreground/70 truncate">
-                Owner / Admin
+                {user?.role === 'admin' ? 'Owner / Admin' : 'Client'}
               </p>
             </div>
           )}
@@ -100,44 +108,70 @@ export function AppSidebar() {
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto py-4">
           <ul className="space-y-1 px-2">
-            {navigationItems.map((item) => {
-              // TODO: wire to real auth role; currently all users see items marked adminOnly.
-              if (item.adminOnly) {
-                // Placeholder for future role check
-              }
-              const isActive = location.pathname === item.href;
-              return (
-                <li key={item.name}>
-                  <Link
-                    to={item.href}
-                    className={cn(
-                      "relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                      isActive
-                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                        : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
-                      collapsed && "justify-center px-2"
-                    )}
-                    title={collapsed ? item.name : undefined}
-                  >
-                    <item.icon size={20} className="shrink-0" />
-                    {!collapsed && <span>{item.name}</span>}
-                    {item.name === "Messages" && unreadCount > 0 && (
-                      <span
-                        className={cn(
-                          "ml-auto inline-flex h-6 min-w-[24px] items-center justify-center rounded-full bg-primary px-2 text-xs font-semibold text-primary-foreground",
-                          collapsed && "absolute right-2 top-2 ml-0 h-2 w-2 min-w-0 p-0 text-[0px]"
-                        )}
-                      >
-                        {collapsed ? "." : unreadCount}
-                      </span>
-                    )}
-                  </Link>
-                </li>
-              );
-            })}
+            {navigationItems
+              .filter(item => !item.adminOnly || user?.role === 'admin')
+              .map((item) => {
+                const isActive = location.pathname === item.href;
+                return (
+                  <li key={item.name}>
+                    <Link
+                      to={item.href}
+                      onClick={onNavigate}
+                      className={cn(
+                        "relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                        isActive
+                          ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                          : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+                        collapsed && "justify-center px-2"
+                      )}
+                      title={collapsed ? item.name : undefined}
+                    >
+                      <item.icon size={20} className="shrink-0" />
+                      {!collapsed && <span>{item.name}</span>}
+                      {item.name === "Messages" && unreadCount > 0 && (
+                        <span
+                          className={cn(
+                            "ml-auto inline-flex h-6 min-w-[24px] items-center justify-center rounded-full bg-primary px-2 text-xs font-semibold text-primary-foreground",
+                            collapsed && "absolute right-2 top-2 ml-0 h-2 w-2 min-w-0 p-0 text-[0px]"
+                          )}
+                        >
+                          {collapsed ? "." : unreadCount}
+                        </span>
+                      )}
+                    </Link>
+                  </li>
+                );
+              })}
           </ul>
         </nav>
+
+        {/* Logout Button */}
+        <div className="p-4 border-t border-sidebar-border">
+          <button
+            onClick={async () => {
+              await signOut();
+              navigate('/login');
+            }}
+            className={cn(
+              "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors",
+              collapsed && "justify-center px-2"
+            )}
+            title={collapsed ? "Sign Out" : undefined}
+          >
+            <LogOut size={20} className="shrink-0" />
+            {!collapsed && <span>Sign Out</span>}
+          </button>
+        </div>
       </div>
     </aside>
   );
+}
+
+function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .map(part => part[0])
+    .join('')
+    .substring(0, 2)
+    .toUpperCase();
 }
