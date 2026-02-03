@@ -57,6 +57,7 @@ export default function Leads() {
   const queryClient = useQueryClient();
   const [activeQuickView, setActiveQuickView] = useState<string>("Open + Holds");
   const [searchTerm, setSearchTerm] = useState("");
+  const [showForm, setShowForm] = useState(false);
   const [formState, setFormState] = useState({
     full_name: "",
     email: "",
@@ -241,11 +242,14 @@ export default function Leads() {
           <button
             className="px-4 py-2 bg-foreground text-background rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
             onClick={() => {
-              const form = document.getElementById("inquiry-form");
-              form?.scrollIntoView({ behavior: "smooth" });
+              setShowForm((prev) => !prev);
+              setTimeout(() => {
+                const form = document.getElementById("inquiry-form");
+                form?.scrollIntoView({ behavior: "smooth" });
+              }, 50);
             }}
           >
-            Add Inquiry
+            {showForm ? "Hide Form" : "Add Inquiry"}
           </button>
           <button className="px-4 py-2 bg-muted text-foreground rounded-lg text-sm font-medium hover:bg-muted/80 transition-colors">
             Setup ▾
@@ -265,88 +269,90 @@ export default function Leads() {
           </button>
         </div>
 
-        <div id="inquiry-form" className="mb-6 rounded-xl border border-border bg-card p-5 shadow-card">
-          <h2 className="mb-4 text-lg font-semibold text-foreground">Add Inquiry</h2>
-          <form
-            className="grid gap-4 md:grid-cols-2"
-            onSubmit={(event) => {
-              event.preventDefault();
-              if (!supabaseConfigured || !formState.full_name.trim()) {
-                return;
-              }
-              createInquiry.mutate();
-            }}
-          >
-            <input
-              className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-              placeholder="Full name"
-              value={formState.full_name}
-              onChange={(event) => setFormState({ ...formState, full_name: event.target.value })}
-            />
-            <input
-              className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-              placeholder="Email"
-              type="email"
-              value={formState.email}
-              onChange={(event) => setFormState({ ...formState, email: event.target.value })}
-            />
-            <input
-              className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-              placeholder="Phone"
-              value={formState.phone}
-              onChange={(event) => setFormState({ ...formState, phone: event.target.value })}
-            />
-            <input
-              className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-              placeholder="Source (website, Instagram, referral)"
-              value={formState.source}
-              onChange={(event) => setFormState({ ...formState, source: event.target.value })}
-            />
-            <input
-              className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-              placeholder="Event start date"
-              type="date"
-              value={formState.event_start_date}
-              onChange={(event) => setFormState({ ...formState, event_start_date: event.target.value })}
-            />
-            <input
-              className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-              placeholder="Estimated guest count"
-              type="number"
-              min={0}
-              value={formState.estimated_guest_count}
-              onChange={(event) => setFormState({ ...formState, estimated_guest_count: event.target.value })}
-            />
-            <select
-              className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-              value={formState.status}
-              onChange={(event) => setFormState({ ...formState, status: event.target.value as Inquiry["status"] })}
+        {showForm && (
+          <div id="inquiry-form" className="mb-6 rounded-xl border border-border bg-card p-5 shadow-card">
+            <h2 className="mb-4 text-lg font-semibold text-foreground">Add Inquiry</h2>
+            <form
+              className="grid gap-4 md:grid-cols-2"
+              onSubmit={(event) => {
+                event.preventDefault();
+                if (!supabaseConfigured || !formState.full_name.trim()) {
+                  return;
+                }
+                createInquiry.mutate();
+              }}
             >
-              <option value="inquiry">New inquiry</option>
-              <option value="contacted">Contacted</option>
-              <option value="tour_scheduled">Tour scheduled</option>
-              <option value="proposal_sent">Proposal sent</option>
-              <option value="booked">Booked</option>
-              <option value="declined">Declined</option>
-              <option value="hold">Hold</option>
-            </select>
-            <input
-              className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-              placeholder="Notes"
-              value={formState.notes}
-              onChange={(event) => setFormState({ ...formState, notes: event.target.value })}
-            />
-            <div className="md:col-span-2">
-              <button
-                type="submit"
-                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
-                disabled={!supabaseConfigured || createInquiry.isPending}
+              <input
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                placeholder="Full name"
+                value={formState.full_name}
+                onChange={(event) => setFormState({ ...formState, full_name: event.target.value })}
+              />
+              <input
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                placeholder="Email"
+                type="email"
+                value={formState.email}
+                onChange={(event) => setFormState({ ...formState, email: event.target.value })}
+              />
+              <input
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                placeholder="Phone"
+                value={formState.phone}
+                onChange={(event) => setFormState({ ...formState, phone: event.target.value })}
+              />
+              <input
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                placeholder="Source (website, Instagram, referral)"
+                value={formState.source}
+                onChange={(event) => setFormState({ ...formState, source: event.target.value })}
+              />
+              <input
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                placeholder="Event start date"
+                type="date"
+                value={formState.event_start_date}
+                onChange={(event) => setFormState({ ...formState, event_start_date: event.target.value })}
+              />
+              <input
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                placeholder="Estimated guest count"
+                type="number"
+                min={0}
+                value={formState.estimated_guest_count}
+                onChange={(event) => setFormState({ ...formState, estimated_guest_count: event.target.value })}
+              />
+              <select
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                value={formState.status}
+                onChange={(event) => setFormState({ ...formState, status: event.target.value as Inquiry["status"] })}
               >
-                {createInquiry.isPending ? "Saving..." : "Save inquiry"}
-              </button>
-            </div>
-          </form>
-        </div>
+                <option value="inquiry">New inquiry</option>
+                <option value="contacted">Contacted</option>
+                <option value="tour_scheduled">Tour scheduled</option>
+                <option value="proposal_sent">Proposal sent</option>
+                <option value="booked">Booked</option>
+                <option value="declined">Declined</option>
+                <option value="hold">Hold</option>
+              </select>
+              <input
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                placeholder="Notes"
+                value={formState.notes}
+                onChange={(event) => setFormState({ ...formState, notes: event.target.value })}
+              />
+              <div className="md:col-span-2">
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+                  disabled={!supabaseConfigured || createInquiry.isPending}
+                >
+                  {createInquiry.isPending ? "Saving..." : "Save inquiry"}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
 
         {/* Status Cards */}
         <div className="grid grid-cols-5 gap-4 mb-6">
