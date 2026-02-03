@@ -83,6 +83,11 @@ export async function createContract(args: {
     .select("*")
     .maybeSingle();
   if (error || !data) throw error ?? new Error("Failed to create contract");
+
+  if (args.inquiryId) {
+    await supabase.from("inquiries").update({ status: "proposal_sent" }).eq("id", args.inquiryId);
+  }
+
   return data as ContractRow;
 }
 
