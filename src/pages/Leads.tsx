@@ -150,7 +150,7 @@ export default function Leads() {
 
   const createInquiry = useMutation({
     mutationFn: async () => {
-      if (!supabaseConfigured) return;
+      if (!supabaseConfigured) return null;
       const payload = {
         full_name: formState.full_name.trim(),
         email: formState.email.trim() || null,
@@ -163,10 +163,11 @@ export default function Leads() {
           : null,
         notes: formState.notes.trim() || null,
       };
-      const { error } = await supabase.from("inquiries").insert(payload);
+      const { data, error } = await supabase.from("inquiries").insert(payload).select("*").maybeSingle();
       if (error) throw error;
+      return data ?? null;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       setFormState({
         full_name: "",
         email: "",
@@ -178,6 +179,11 @@ export default function Leads() {
         notes: "",
       });
       setShowForm(false);
+      if (data) {
+        queryClient.setQueryData(["inquiries"], (prev: Inquiry[] | undefined) => {
+          return [data, ...(prev ?? [])];
+        });
+      }
       queryClient.invalidateQueries({ queryKey: ["inquiries"] });
       toast({ title: "Inquiry saved", description: "New inquiry added to the board." });
     },
