@@ -133,15 +133,15 @@ export default function LeadDetail() {
 
       const when = `${payload.tour_date} at ${payload.tour_time}`;
       const directions =
-        "Rustic Retreat, Lac Saint Anne County (near Lac La Nonne). We’ll send a pin if you need it.";
+        "Directions to Rustic Retreat (3121 Township Rd 572A, Lac La Nonne):\nFrom Edmonton:\nHead west on Yellowhead Trail (Highway 16) toward St. Albert\nContinue ~60 km until Highway 43 junction\nTurn right (north) onto Highway 43 toward Whitecourt/Barrhead\nTurn right (north) onto Highway 33 toward Barrhead/Lac La Nonne\nContinue north on Highway 33 for 15-20 minutes\nTurn right (east) onto Township Road 572A\nDrive east for a couple kilometres - we're at #3121 on the right";
       const expectations =
-        "Please arrive 5–10 minutes early. Wear comfortable shoes for walking the property. Feel free to bring family or your planner.";
+        "What to Expect:\nYour tour will last approximately 60-90 minutes. We'll walk through the ceremony site, reception area, and guest accommodations. Feel free to bring family members who are helping with planning. Dress appropriately for the weather - tours happen rain or shine. For questions before your tour, contact Shannon at 780-210-6252. We're excited to show you Rustic Retreat!";
 
       await sendMessage({
         contactId,
         channel: "email",
         subject: "Your Rustic Retreat tour is scheduled",
-        body: `Hi ${formState.clientName || inquiry?.full_name || "there"},\n\nYour tour is booked for ${when}.\n\nDirections: ${directions}\nWhat to expect: ${expectations}\n\nIf you need to reschedule, just reply to this email.`,
+        body: `Hi ${formState.clientName || inquiry?.full_name || "there"},\n\nYour tour is booked for ${when}.\n\n${directions}\n\n${expectations}\n\nIf you need to reschedule, just reply to this email.`,
       });
 
       return data;
