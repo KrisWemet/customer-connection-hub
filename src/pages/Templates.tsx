@@ -5,6 +5,7 @@ import { EntityTable } from "@/components/EntityTable";
 import { SupabaseNotice } from "@/components/SupabaseNotice";
 import { supabase, supabaseConfigured } from "@/lib/supabase/client";
 import type { Tables } from "@/types/supabase";
+import { MERGE_FIELDS } from "@/lib/messaging/mergeFields";
 
 const inputClassName =
   "w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20";
@@ -70,6 +71,20 @@ export default function Templates() {
         </div>
 
         <SupabaseNotice title="Supabase not configured for templates." />
+
+        <div className="mb-6 rounded-xl border border-border bg-card p-5 shadow-card space-y-3">
+          <h2 className="text-lg font-semibold text-foreground">Merge Fields</h2>
+          <p className="text-sm text-muted-foreground">
+            Use double curly braces in templates, e.g. <code>{{"{{client_name}}"}}</code>.
+          </p>
+          <div className="flex flex-wrap gap-2 text-xs">
+            {MERGE_FIELDS.map((field) => (
+              <span key={field} className="rounded-full bg-muted px-3 py-1 text-muted-foreground">
+                {{"{{"}}{field}{{"}}"}}
+              </span>
+            ))}
+          </div>
+        </div>
 
         <div className="mb-6 rounded-xl border border-border bg-card p-5 shadow-card">
           <h2 className="mb-4 text-lg font-semibold text-foreground">Add Template</h2>

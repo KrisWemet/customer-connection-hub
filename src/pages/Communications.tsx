@@ -6,6 +6,7 @@ import { SupabaseNotice } from "@/components/SupabaseNotice";
 import { integrationConfig } from "@/lib/integrations/config";
 import { supabase, supabaseConfigured } from "@/lib/supabase/client";
 import type { Tables } from "@/types/supabase";
+import { applyMergeFields, MERGE_FIELDS } from "@/lib/messaging/mergeFields";
 
 const inputClassName =
   "w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20";
@@ -18,6 +19,16 @@ export default function Communications() {
     subject: "",
     body: "",
   });
+  const [selectedTemplate, setSelectedTemplate] = useState("");
+  const [mergeValues, setMergeValues] = useState<Record<string, string>>({
+    client_name: "",
+    client_email: "",
+    event_date: "",
+    event_start_date: "",
+    event_end_date: "",
+    booking_id: "",
+    invoice_amount: "",
+  });
 
   const { data = [] } = useQuery({
     queryKey: ["communication_logs"],
@@ -27,6 +38,23 @@ export default function Communications() {
       }
       const { data: rows, error } = await supabase
         .from("communication_logs")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) {
+        throw error;
+      }
+      return rows ?? [];
+    },
+  });
+
+  const { data: templates = [] } = useQuery({
+    queryKey: ["templates"],
+    queryFn: async () => {
+      if (!supabaseConfigured) {
+        return [] as Tables<"templates">[];
+      }
+      const { data: rows, error } = await supabase
+        .from("templates")
         .select("*")
         .order("created_at", { ascending: false });
       if (error) {
@@ -97,8 +125,11 @@ export default function Communications() {
           </div>
         </div>
 
-        <div className="mb-6 rounded-xl border border-border bg-card p-5 shadow-card">
-          <h2 className="mb-4 text-lg font-semibold text-foreground">Log Communication</h2>
+        <div className="mb-6 rounded-xl border border-border bg-card p-5 shadow-card space-y-4">
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">Log Communication</h2>
+            <p className="text-sm text-muted-foreground">Pick a template and apply merge fields before logging.</p>
+          </div>
           <form
             className="grid gap-4 md:grid-cols-2"
             onSubmit={(event) => {
@@ -109,9 +140,62 @@ export default function Communications() {
               createLog.mutate();
             }}
           >
+            <select
+              className={inputClassName}
+              value={selectedTemplate}
+              onChange={(event) => {
+                const templateId = event.target.value;
+                setSelectedTemplate(templateId);
+                const template = templates.find((row) => row.id === templateId);
+                if (template) {
+                  setFormState((prev) => ({
+                    ...prev,
+                    channel: template.type === "sms" ? "sms" : "email",
+                    subject: template.subject ?? "",
+                    body: template.body ?? "",
+                  }));
+                }
+              }}
+            >
+              <option value="">Select a template (optional)</option>
+              {templates.map((template) => (
+                <option key={template.id} value={template.id}>
+                  {template.name}
+                </option>
+              ))}
+            </select>
+            <div className="grid grid-cols-2 gap-2">
+              {MERGE_FIELDS.map((field) => (
+                <input
+                  key={field}
+                  className={inputClassName}
+                  placeholder={field}
+                  value={mergeValues[field] ?? ""}
+                  onChange={(event) => setMergeValues({ ...mergeValues, [field]: event.target.value })}
+                />
+              ))}
+            </div>
+            <p className="md:col-span-2 text-xs text-muted-foreground">
+              Merge fields: {MERGE_FIELDS.map((field) => `{{${field}}}`).join(", ")}
+            </p>
+            <div className="md:col-span-2">
+              <button
+                type="button"
+                className="rounded-lg border border-border px-4 py-2 text-xs font-semibold text-muted-foreground"
+                onClick={() => {
+                  setFormState((prev) => ({
+                    ...prev,
+                    subject: applyMergeFields(prev.subject, mergeValues),
+                    body: applyMergeFields(prev.body, mergeValues),
+                  }));
+                }}
+              >
+                Apply merge fields
+              </button>
+            </div>
             <input
               className={inputClassName}
-              placeholder="Channel (sms/email/call/note)"
+              placeholder="Channel (sms/email/note)"
               value={formState.channel}
               onChange={(event) => setFormState({ ...formState, channel: event.target.value })}
               required
