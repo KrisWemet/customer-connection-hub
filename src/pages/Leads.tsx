@@ -219,17 +219,17 @@ export default function Leads() {
 
   return (
     <AppLayout>
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <a href="/" className="hover:text-primary">Home</a>
           <span>//</span>
           <span>Inquiries</span>
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-4xl font-bold text-primary">Inquiries</h1>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-3xl sm:text-4xl font-bold text-primary">Inquiries</h1>
           <a href="#" className="text-sm text-primary hover:underline flex items-center gap-1">
             📋 Inquiry Timeline
           </a>
@@ -238,7 +238,7 @@ export default function Leads() {
         <SupabaseNotice title="Supabase not configured for inquiries." />
 
         {/* Actions */}
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex flex-wrap items-center gap-3">
           <button
             className="px-4 py-2 bg-foreground text-background rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
             onClick={() => {
@@ -255,11 +255,11 @@ export default function Leads() {
             Setup ▾
           </button>
           <div className="flex-1" />
-          <div className="relative">
+          <div className="relative w-full sm:w-72">
             <input
               type="text"
               placeholder="Begin typing to filter current view..."
-              className="w-72 px-4 py-2 bg-card border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="w-full px-4 py-2 bg-card border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
             />
@@ -379,24 +379,24 @@ export default function Leads() {
         )}
 
         {/* Status Cards */}
-        <div className="grid grid-cols-5 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {statusCards.map((card, idx) => (
             <div
               key={idx}
               className="bg-card rounded-xl p-4 border border-border/50 shadow-card flex items-center gap-4 animate-fade-in"
             >
-              <div className={cn("w-12 h-12 rounded-full flex items-center justify-center", card.color)}>
+              <div className={cn("w-12 h-12 rounded-full flex items-center justify-center shrink-0", card.color)}>
                 <card.icon size={24} className="text-white" />
               </div>
-              <div>
-                <div className="flex items-baseline gap-2">
-                  <span className="font-semibold text-foreground">{card.title}</span>
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-baseline gap-2">
+                  <span className="font-semibold text-foreground whitespace-normal">{card.title}</span>
                   {card.subtitleText && (
                     <span className="text-xs text-muted-foreground">({card.subtitleText})</span>
                   )}
                   <span className="text-lg font-bold text-foreground">{card.count}</span>
                 </div>
-                <p className="text-xs text-primary">{card.subtitle}</p>
+                <p className="text-xs text-primary whitespace-normal">{card.subtitle}</p>
               </div>
             </div>
           ))}
