@@ -5,6 +5,7 @@ import { SupabaseNotice } from "@/components/SupabaseNotice";
 import { supabase, supabaseConfigured } from "@/lib/supabase/client";
 import {
   cancelContract,
+  createBookingFromInquiry,
   createContract,
   sendContract,
 } from "@/lib/contracts/service";
@@ -85,6 +86,25 @@ export default function LeadDetail() {
     },
   });
 
+  const createBookingMutation = useMutation({
+    mutationFn: async () => {
+      if (!id) throw new Error("Missing inquiry id");
+      return createBookingFromInquiry({
+        inquiryId: id,
+        packageType: formState.packageType,
+        eventStartDate: formState.eventStartDate,
+        eventEndDate: formState.eventEndDate,
+        totalAmount: Number(formState.totalAmount),
+        clientName: formState.clientName || inquiry?.full_name || "",
+        clientEmail: formState.clientEmail || inquiry?.email || "",
+        clientPhone: formState.clientPhone || inquiry?.phone || null,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inquiry", id] });
+    },
+  });
+
   const previewHtml = useMemo(() => {
     if (!showPreview) return "";
     return generateContractHtml({
@@ -107,6 +127,12 @@ export default function LeadDetail() {
     Boolean(formState.eventStartDate && formState.eventEndDate) &&
     Number(formState.totalAmount) > 0 &&
     Number(formState.depositAmount) >= 0 &&
+    Boolean((formState.clientName || inquiry?.full_name) && (formState.clientEmail || inquiry?.email));
+
+  const canCreateBooking =
+    supabaseConfigured &&
+    Boolean(formState.eventStartDate && formState.eventEndDate) &&
+    Number(formState.totalAmount) > 0 &&
     Boolean((formState.clientName || inquiry?.full_name) && (formState.clientEmail || inquiry?.email));
 
   return (
@@ -289,6 +315,23 @@ export default function LeadDetail() {
               ))
             )}
           </div>
+        </div>
+
+        <div className="rounded-xl border border-border bg-card p-5 shadow-card space-y-3">
+          <h2 className="text-lg font-semibold text-foreground">Create Booking (Skip Contract)</h2>
+          <p className="text-xs text-muted-foreground">
+            Use this only if you want to bypass the contract and confirm a booking directly.
+          </p>
+          <button
+            type="button"
+            className={`rounded-lg px-4 py-2 text-sm font-semibold ${
+              canCreateBooking ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+            }`}
+            onClick={() => createBookingMutation.mutate()}
+            disabled={!canCreateBooking || createBookingMutation.isPending}
+          >
+            {createBookingMutation.isPending ? "Creating booking..." : "Create Booking"}
+          </button>
         </div>
       </div>
     </AppLayout>

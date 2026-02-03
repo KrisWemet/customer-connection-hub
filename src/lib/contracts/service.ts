@@ -251,7 +251,7 @@ async function createBookingFromContract(contract: ContractRow): Promise<Booking
     .maybeSingle();
   if (error || !booking) throw error ?? new Error("Failed to create booking");
 
-  await createScheduleAndIntents({
+  const scheduleRows = await createScheduleAndIntents({
     booking: booking as Booking,
     settings,
     bookingDate: new Date().toISOString().slice(0, 10),
@@ -265,5 +265,84 @@ async function createBookingFromContract(contract: ContractRow): Promise<Booking
     status: "pending",
   });
 
+  await createInvoiceForBooking({
+    bookingId: booking.id,
+    totalAmount: contract.total_amount,
+    scheduleRows: scheduleRows as Tables<"payment_schedule">[],
+  });
+
   return booking as Booking;
 }
+
+export async function createBookingFromInquiry(args: {
+  inquiryId: string;
+  packageType: string;
+  eventStartDate: string;
+  eventEndDate: string;
+  totalAmount: number;
+  clientName: string;
+  clientEmail: string;
+  clientPhone?: string | null;
+}) {
+  const settings = await fetchVenueSettings();
+  if (!settings) throw new Error("Venue settings not configured");
+
+  const { data: booking, error } = await supabase
+    .from("bookings")
+    .insert({
+      package_type: args.packageType,
+      start_date: args.eventStartDate,
+      end_date: args.eventEndDate,
+      base_price: args.totalAmount,
+      status: "confirmed",
+      client_name: args.clientName,
+      client_email: args.clientEmail,
+      inquiry_id: args.inquiryId,
+    })
+    .select("*")
+    .maybeSingle();
+  if (error || !booking) throw error ?? new Error("Failed to create booking");
+
+  const scheduleRows = await createScheduleAndIntents({
+    booking: booking as Booking,
+    settings,
+    bookingDate: new Date().toISOString().slice(0, 10),
+    upsellTotal: 0,
+    currency: "cad",
+  });
+
+  await supabase.from("damage_deposits").insert({
+    booking_id: booking.id,
+    amount: settings.damage_deposit_amount ?? 500,
+    status: "pending",
+  });
+
+  await createInvoiceForBooking({
+    bookingId: booking.id,
+    totalAmount: args.totalAmount,
+    scheduleRows: scheduleRows as Tables<"payment_schedule">[],
+  });
+
+  await supabase.from("inquiries").update({ status: "booked" }).eq("id", args.inquiryId);
+
+  return booking as Booking;
+}
+
+async function createInvoiceForBooking(args: {
+  bookingId: string;
+  totalAmount: number;
+  scheduleRows: Tables<"payment_schedule">[];
+}) {
+  const earliestDue = args.scheduleRows
+    .map((row) => row.due_date)
+    .filter(Boolean)
+    .sort()[0];
+
+  await supabase.from("invoices").insert({
+    booking_id: args.bookingId,
+    amount: args.totalAmount,
+    status: "sent",
+    due_date: earliestDue ?? null,
+  });
+}
+
