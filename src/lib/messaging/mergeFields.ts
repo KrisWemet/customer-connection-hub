@@ -8,6 +8,11 @@ export const MERGE_FIELDS = [
   "event_end_date",
   "booking_id",
   "invoice_amount",
+  "payment_amount",
+  "payment_due_date",
+  "tour_date",
+  "tour_time",
+  "venue_name",
 ] as const;
 
 export function applyMergeFields(template: string, values: MergeFieldValues) {

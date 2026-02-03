@@ -11,6 +11,7 @@ import {
 } from "@/lib/contracts/service";
 import { generateContractHtml } from "@/lib/contracts/template";
 import { sendMessage } from "@/lib/messaging/service";
+import { getTemplateByKey, renderTemplate } from "@/lib/messaging/templates";
 import { Link, useParams } from "react-router-dom";
 
 export default function LeadDetail() {
@@ -132,16 +133,28 @@ export default function LeadDetail() {
       });
 
       const when = `${payload.tour_date} at ${payload.tour_time}`;
-      const directions =
-        "Directions to Rustic Retreat (3121 Township Rd 572A, Lac La Nonne):\nFrom Edmonton:\nHead west on Yellowhead Trail (Highway 16) toward St. Albert\nContinue ~60 km until Highway 43 junction\nTurn right (north) onto Highway 43 toward Whitecourt/Barrhead\nTurn right (north) onto Highway 33 toward Barrhead/Lac La Nonne\nContinue north on Highway 33 for 15-20 minutes\nTurn right (east) onto Township Road 572A\nDrive east for a couple kilometres - we're at #3121 on the right";
-      const expectations =
-        "What to Expect:\nYour tour will last approximately 60-90 minutes. We'll walk through the ceremony site, reception area, and guest accommodations. Feel free to bring family members who are helping with planning. Dress appropriately for the weather - tours happen rain or shine. For questions before your tour, contact Shannon at 780-210-6252. We're excited to show you Rustic Retreat!";
+
+      const template = await getTemplateByKey("tour_confirmation");
+      let subject = "Your Rustic Retreat tour is scheduled";
+      let body = `Hi ${formState.clientName || inquiry?.full_name || "there"},\n\nYour tour is booked for ${when}.\n\nDirections to Rustic Retreat (3121 Township Rd 572A, Lac La Nonne):\nFrom Edmonton:\nHead west on Yellowhead Trail (Highway 16) toward St. Albert\nContinue ~60 km until Highway 43 junction\nTurn right (north) onto Highway 43 toward Whitecourt/Barrhead\nTurn right (north) onto Highway 33 toward Barrhead/Lac La Nonne\nContinue north on Highway 33 for 15-20 minutes\nTurn right (east) onto Township Road 572A\nDrive east for a couple kilometres - we're at #3121 on the right\n\nWhat to Expect:\nYour tour will last approximately 60-90 minutes. We'll walk through the ceremony site, reception area, and guest accommodations. Feel free to bring family members who are helping with planning. Dress appropriately for the weather - tours happen rain or shine. For questions before your tour, contact Shannon at 780-210-6252. We're excited to show you Rustic Retreat!\n\nIf you need to reschedule, just reply to this email.`;
+
+      if (template) {
+        const rendered = renderTemplate(template, {
+          client_name: formState.clientName || inquiry?.full_name || "",
+          client_email: formState.clientEmail || inquiry?.email || "",
+          tour_date: payload.tour_date,
+          tour_time: payload.tour_time,
+          venue_name: "Rustic Retreat",
+        });
+        subject = rendered.subject || subject;
+        body = rendered.body || body;
+      }
 
       await sendMessage({
         contactId,
         channel: "email",
-        subject: "Your Rustic Retreat tour is scheduled",
-        body: `Hi ${formState.clientName || inquiry?.full_name || "there"},\n\nYour tour is booked for ${when}.\n\n${directions}\n\n${expectations}\n\nIf you need to reschedule, just reply to this email.`,
+        subject,
+        body,
       });
 
       return data;

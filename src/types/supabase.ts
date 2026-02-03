@@ -201,6 +201,13 @@ export type Database = {
           id: string;
           name: string;
           type: "email" | "sms" | "document";
+          template_key:
+            | "contract_sent"
+            | "tour_confirmation"
+            | "payment_reminder"
+            | "payment_overdue"
+            | "booking_confirmation"
+            | "general";
           subject: string | null;
           body: string | null;
           created_by: string | null;
@@ -349,6 +356,13 @@ export type Database = {
       proposal_status: "draft" | "sent" | "accepted" | "expired" | "declined";
       invoice_status: "draft" | "sent" | "paid" | "overdue" | "void";
       template_type: "email" | "sms" | "document";
+      template_key:
+        | "contract_sent"
+        | "tour_confirmation"
+        | "payment_reminder"
+        | "payment_overdue"
+        | "booking_confirmation"
+        | "general";
       communication_channel: "email" | "sms" | "note";
       communication_direction: "inbound" | "outbound";
       communication_status: "logged" | "sent" | "failed";

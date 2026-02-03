@@ -94,9 +94,28 @@ Deno.serve(async (req) => {
       contactId = newContact.id;
     }
 
-    const subject = `Payment reminder — ${row.label}`;
+    let subject = `Payment reminder — ${row.label}`;
     const amount = Number(row.amount || 0).toFixed(2);
-    const body = `Hi ${booking.client_name ?? "there"},\n\nThis is a friendly reminder that a payment of $${amount} (${row.label}) is due on ${row.due_date}.\n\nIf you have any questions, reply anytime.\n\n— Rustic Retreat`;
+    let body = `Hi ${booking.client_name ?? "there"},\n\nThis is a friendly reminder that a payment of $${amount} (${row.label}) is due on ${row.due_date}.\n\nIf you have any questions, reply anytime.\n\n— Rustic Retreat`;
+
+    const { data: template } = await supabase
+      .from("templates")
+      .select("subject, body")
+      .eq("template_key", "payment_reminder")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (template?.subject || template?.body) {
+      const apply = (text: string) =>
+        text
+          .replace(/{{\s*client_name\s*}}/gi, booking.client_name ?? "")
+          .replace(/{{\s*payment_amount\s*}}/gi, `$${amount}`)
+          .replace(/{{\s*payment_due_date\s*}}/gi, row.due_date ?? "")
+          .replace(/{{\s*venue_name\s*}}/gi, "Rustic Retreat");
+      if (template.subject) subject = apply(template.subject);
+      if (template.body) body = apply(template.body);
+    }
 
     const { error: msgError } = await supabase.from("messages").insert({
       thread_id: null,

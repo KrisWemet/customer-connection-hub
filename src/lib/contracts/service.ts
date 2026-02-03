@@ -3,6 +3,7 @@ import { generateContractHtml, type ContractTemplateData } from "@/lib/contracts
 import { generatePdfFromHtml } from "@/lib/contracts/pdf";
 import { sendMessage } from "@/lib/messaging/service";
 import { createScheduleAndIntents } from "@/lib/payments/service";
+import { getTemplateByKey, renderTemplate } from "@/lib/messaging/templates";
 import type { Tables } from "@/types/supabase";
 
 type ContractStatus = "draft" | "sent" | "viewed" | "signed" | "expired" | "cancelled";
@@ -126,15 +127,32 @@ export async function sendContract(contractId: string, method: "email" | "sms") 
   }
 
   const contactId = await ensureContact(contract);
-  const body =
+  let subject = method === "email" ? `Your Rustic Retreat Contract ${contract.contract_number}` : undefined;
+  let body =
     method === "sms"
       ? `View and sign your contract: ${link}`
       : `Hello ${contract.client_name},\n\nPlease review and sign your contract: ${link}\n\nThank you!`;
 
+  if (method === "email") {
+    const template = await getTemplateByKey("contract_sent");
+    if (template) {
+      const rendered = renderTemplate(template, {
+        client_name: contract.client_name,
+        client_email: contract.client_email,
+        event_date: contract.event_start_date,
+        event_start_date: contract.event_start_date,
+        event_end_date: contract.event_end_date,
+        venue_name: "Rustic Retreat",
+      });
+      subject = rendered.subject || subject;
+      body = `${rendered.body}\n\nContract link: ${link}`.trim();
+    }
+  }
+
   await sendMessage({
     contactId,
     channel: method,
-    subject: method === "email" ? `Your Rustic Retreat Contract ${contract.contract_number}` : undefined,
+    subject,
     body,
   });
 
@@ -176,11 +194,26 @@ export async function signContract(contractId: string, signatureData: string, ip
     await supabase.from("contracts").update({ booking_id: booking.id }).eq("id", contractId);
     await supabase.from("inquiries").update({ status: "booked" }).eq("id", contract.inquiry_id ?? "");
 
+    const template = await getTemplateByKey("booking_confirmation");
+    let subject = "Your booking is confirmed";
+    let body = `Hi ${contract.client_name},\n\nYour booking is confirmed. We'll be in touch with next steps.`;
+    if (template) {
+      const rendered = renderTemplate(template, {
+        client_name: contract.client_name,
+        client_email: contract.client_email,
+        event_date: contract.event_start_date,
+        event_start_date: contract.event_start_date,
+        event_end_date: contract.event_end_date,
+        venue_name: "Rustic Retreat",
+      });
+      subject = rendered.subject || subject;
+      body = rendered.body || body;
+    }
     await sendMessage({
       contactId: await ensureContact(contract),
       channel: "email",
-      subject: "Your booking is confirmed",
-      body: `Hi ${contract.client_name},\n\nYour booking is confirmed. We'll be in touch with next steps.`,
+      subject,
+      body,
     });
   }
 }

@@ -3,6 +3,7 @@ import type { Tables } from "@/types/supabase";
 import { generateScheduleForBooking } from "./generator";
 import { statusFromStripeStatus } from "./status";
 import { sendMessage } from "@/lib/messaging/service";
+import { getTemplateByKey, renderTemplate } from "@/lib/messaging/templates";
 
 type VenueSettings = Tables<"venue_settings">;
 type Booking = Tables<"bookings">;
@@ -96,8 +97,21 @@ export async function sendPaymentReminders(args: { bookingId: string; windowDays
   for (const row of upcoming) {
     const due = row.due_date ?? "";
     const amount = Number(row.amount || 0).toFixed(2);
-    const subject = `Payment reminder — ${row.label}`;
-    const body = `Hi ${booking.client_name ?? "there"},\n\nThis is a friendly reminder that a payment of $${amount} (${row.label}) is due on ${due}.\n\nIf you have any questions, reply anytime.\n\n— Rustic Retreat`;
+    let subject = `Payment reminder — ${row.label}`;
+    let body = `Hi ${booking.client_name ?? "there"},\n\nThis is a friendly reminder that a payment of $${amount} (${row.label}) is due on ${due}.\n\nIf you have any questions, reply anytime.\n\n— Rustic Retreat`;
+
+    const template = await getTemplateByKey("payment_reminder");
+    if (template) {
+      const rendered = renderTemplate(template, {
+        client_name: booking.client_name ?? "",
+        client_email: booking.client_email ?? "",
+        payment_amount: `$${amount}`,
+        payment_due_date: due,
+        venue_name: "Rustic Retreat",
+      });
+      subject = rendered.subject || subject;
+      body = rendered.body || body;
+    }
 
     await sendMessage({
       contactId,

@@ -5,7 +5,7 @@ import { EntityTable } from "@/components/EntityTable";
 import { SupabaseNotice } from "@/components/SupabaseNotice";
 import { supabase, supabaseConfigured } from "@/lib/supabase/client";
 import type { Tables } from "@/types/supabase";
-import { MERGE_FIELDS } from "@/lib/messaging/mergeFields";
+import { MERGE_FIELDS, applyMergeFields } from "@/lib/messaging/mergeFields";
 
 const inputClassName =
   "w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20";
@@ -15,6 +15,7 @@ export default function Templates() {
   const [formState, setFormState] = useState({
     name: "",
     type: "email",
+    template_key: "general",
     subject: "",
     body: "",
   });
@@ -42,6 +43,7 @@ export default function Templates() {
       const payload = {
         name: formState.name,
         type: formState.type,
+        template_key: formState.template_key,
         subject: formState.subject || null,
         body: formState.body || null,
       };
@@ -51,7 +53,7 @@ export default function Templates() {
       }
     },
     onSuccess: () => {
-      setFormState({ name: "", type: "email", subject: "", body: "" });
+      setFormState({ name: "", type: "email", template_key: "general", subject: "", body: "" });
       queryClient.invalidateQueries({ queryKey: ["templates"] });
     },
   });
@@ -105,6 +107,18 @@ export default function Templates() {
               onChange={(event) => setFormState({ ...formState, name: event.target.value })}
               required
             />
+            <select
+              className={inputClassName}
+              value={formState.template_key}
+              onChange={(event) => setFormState({ ...formState, template_key: event.target.value })}
+            >
+              <option value="contract_sent">Contract Sent</option>
+              <option value="tour_confirmation">Tour Confirmation</option>
+              <option value="payment_reminder">Payment Reminder</option>
+              <option value="payment_overdue">Payment Overdue</option>
+              <option value="booking_confirmation">Booking Confirmation</option>
+              <option value="general">General</option>
+            </select>
             <input
               className={inputClassName}
               placeholder="Type (email/sms/document)"
@@ -135,12 +149,45 @@ export default function Templates() {
           </form>
         </div>
 
+        <div className="mb-6 rounded-xl border border-border bg-card p-5 shadow-card">
+          <h2 className="mb-4 text-lg font-semibold text-foreground">Template Preview</h2>
+          <p className="text-sm text-muted-foreground mb-3">
+            Preview the current subject/body with sample data.
+          </p>
+          <div className="rounded-lg border border-border bg-background p-4 text-sm space-y-2">
+            <div className="font-semibold">Subject</div>
+            <div>
+              {applyMergeFields(formState.subject || "", {
+                client_name: "Alex + Jamie",
+                event_date: "2026-09-18",
+                venue_name: "Rustic Retreat",
+                payment_amount: "$2,500",
+                payment_due_date: "2026-06-18",
+                tour_date: "2026-05-01",
+                tour_time: "2:00 PM",
+              }) || "(no subject)"}
+            </div>
+            <div className="font-semibold">Body</div>
+            <div>
+              {applyMergeFields(formState.body || "", {
+                client_name: "Alex + Jamie",
+                event_date: "2026-09-18",
+                venue_name: "Rustic Retreat",
+                payment_amount: "$2,500",
+                payment_due_date: "2026-06-18",
+                tour_date: "2026-05-01",
+                tour_time: "2:00 PM",
+              }) || "(no body)"}
+            </div>
+          </div>
+        </div>
+
         <EntityTable
           columns={[
             { header: "Name", cell: (row) => row.name },
+            { header: "Key", cell: (row) => row.template_key ?? "general" },
             { header: "Type", cell: (row) => row.type },
             { header: "Subject", cell: (row) => row.subject ?? "-" },
-            { header: "Active", cell: (row) => (row.is_active ? "Yes" : "No") },
           ]}
           data={data}
           emptyMessage="No templates yet. Add your first template above."
