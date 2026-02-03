@@ -4,6 +4,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { KanbanColumn } from "@/components/KanbanColumn";
 import { LeadCardData } from "@/components/LeadCard";
 import { SupabaseNotice } from "@/components/SupabaseNotice";
+import { useToast } from "@/components/ui/use-toast";
 import {
   UserPlus,
   X,
@@ -55,6 +56,7 @@ const baseColumns: { title: string; statuses: Inquiry["status"][] }[] = [
 
 export default function Leads() {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [activeQuickView, setActiveQuickView] = useState<string>("Open + Holds");
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -175,7 +177,16 @@ export default function Leads() {
         estimated_guest_count: "",
         notes: "",
       });
+      setShowForm(false);
       queryClient.invalidateQueries({ queryKey: ["inquiries"] });
+      toast({ title: "Inquiry saved", description: "New inquiry added to the board." });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Save failed",
+        description: error?.message ?? "Could not save inquiry.",
+        variant: "destructive",
+      });
     },
   });
 
