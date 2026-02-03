@@ -12,11 +12,10 @@ const inputClassName =
 export default function Contacts() {
   const queryClient = useQueryClient();
   const [formState, setFormState] = useState({
-    full_name: "",
+    name: "",
     email: "",
     phone: "",
-    organization: "",
-    role: "",
+    contact_type: "lead",
     notes: "",
   });
 
@@ -40,11 +39,10 @@ export default function Contacts() {
   const createContact = useMutation({
     mutationFn: async () => {
       const payload = {
-        full_name: formState.full_name,
+        name: formState.name.trim(),
         email: formState.email || null,
         phone: formState.phone || null,
-        organization: formState.organization || null,
-        role: formState.role || null,
+        contact_type: formState.contact_type as "lead" | "client" | "vendor",
         notes: formState.notes || null,
       };
       const { error } = await supabase.from("contacts").insert(payload);
@@ -54,11 +52,10 @@ export default function Contacts() {
     },
     onSuccess: () => {
       setFormState({
-        full_name: "",
+        name: "",
         email: "",
         phone: "",
-        organization: "",
-        role: "",
+        contact_type: "lead",
         notes: "",
       });
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
@@ -87,7 +84,7 @@ export default function Contacts() {
             className="grid gap-4 md:grid-cols-2"
             onSubmit={(event) => {
               event.preventDefault();
-              if (!supabaseConfigured || !formState.full_name.trim()) {
+              if (!supabaseConfigured || !formState.name.trim()) {
                 return;
               }
               createContact.mutate();
@@ -96,8 +93,8 @@ export default function Contacts() {
             <input
               className={inputClassName}
               placeholder="Full name"
-              value={formState.full_name}
-              onChange={(event) => setFormState({ ...formState, full_name: event.target.value })}
+              value={formState.name}
+              onChange={(event) => setFormState({ ...formState, name: event.target.value })}
               required
             />
             <input
@@ -112,18 +109,15 @@ export default function Contacts() {
               value={formState.phone}
               onChange={(event) => setFormState({ ...formState, phone: event.target.value })}
             />
-            <input
+            <select
               className={inputClassName}
-              placeholder="Vendor / Family"
-              value={formState.organization}
-              onChange={(event) => setFormState({ ...formState, organization: event.target.value })}
-            />
-            <input
-              className={inputClassName}
-              placeholder="Role (Couple/Vendor/Family)"
-              value={formState.role}
-              onChange={(event) => setFormState({ ...formState, role: event.target.value })}
-            />
+              value={formState.contact_type}
+              onChange={(event) => setFormState({ ...formState, contact_type: event.target.value })}
+            >
+              <option value="lead">Lead</option>
+              <option value="client">Client</option>
+              <option value="vendor">Vendor</option>
+            </select>
             <input
               className={inputClassName}
               placeholder="Notes"
