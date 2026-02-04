@@ -140,6 +140,14 @@ async function sendEmailViaEdge(to: string, subject: string, html: string): Prom
   return data;
 }
 
+export async function sendTestSms(to: string, body: string): Promise<EdgeSendResult> {
+  return sendSmsViaEdge(to, body);
+}
+
+export async function sendTestEmail(to: string, subject: string, html: string): Promise<EdgeSendResult> {
+  return sendEmailViaEdge(to, subject, html);
+}
+
 // Utility to store inbound messages (to be used by webhook handlers later)
 export async function storeInboundMessage(args: {
   contactId: string;

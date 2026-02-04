@@ -5,7 +5,8 @@ import { AppLayout } from "@/components/AppLayout";
 import { SupabaseNotice } from "@/components/SupabaseNotice";
 import { cn } from "@/lib/utils";
 import { supabase, supabaseConfigured } from "@/lib/supabase/client";
-import { getMessages, getThreads, markAsRead, sendMessage } from "@/lib/messaging/service";
+import { getMessages, getThreads, markAsRead, sendMessage, sendTestEmail, sendTestSms } from "@/lib/messaging/service";
+import { toast } from "@/components/ui/sonner";
 
 type Thread = Awaited<ReturnType<typeof getThreads>>[number];
 
@@ -73,6 +74,10 @@ export default function Messages() {
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [toContactId, setToContactId] = useState("");
+  const [testPhone, setTestPhone] = useState(import.meta.env.VITE_TEST_PHONE ?? "");
+  const [testEmail, setTestEmail] = useState(import.meta.env.VITE_TEST_EMAIL ?? "");
+  const [testSubject, setTestSubject] = useState("Test message from Customer Connection Hub");
+  const [testBody, setTestBody] = useState("This is a test message from Customer Connection Hub.");
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const { data: threads = [], isLoading: threadsLoading } = useQuery({
@@ -154,6 +159,37 @@ export default function Messages() {
       }
       queryClient.invalidateQueries({ queryKey: ["message_threads"] });
       queryClient.invalidateQueries({ queryKey: ["messages", msg?.thread_id] });
+      toast.success("Message sent");
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Failed to send message");
+    },
+  });
+
+  const sendTestSmsMutation = useMutation({
+    mutationFn: async () => {
+      if (!testPhone.trim()) throw new Error("Enter a test phone number.");
+      if (!testBody.trim()) throw new Error("Enter a test message.");
+      return sendTestSms(testPhone.trim(), testBody.trim());
+    },
+    onSuccess: () => {
+      toast.success("Test SMS sent");
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Test SMS failed");
+    },
+  });
+
+  const sendTestEmailMutation = useMutation({
+    mutationFn: async () => {
+      if (!testEmail.trim()) throw new Error("Enter a test email address.");
+      return sendTestEmail(testEmail.trim(), testSubject.trim() || "Test message", testBody.trim());
+    },
+    onSuccess: () => {
+      toast.success("Test email sent");
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Test email failed");
     },
   });
 
@@ -228,9 +264,120 @@ export default function Messages() {
             <h1 className="text-4xl font-bold text-primary">Messages</h1>
           </div>
           <SupabaseNotice title="Supabase not configured for messages." />
+          <div className="mt-4 hidden rounded-2xl border border-border bg-card p-4 shadow-card lg:block">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-foreground">Messaging health</h2>
+              <span className={cn("text-xs font-semibold", supabaseConfigured ? "text-emerald-600" : "text-destructive")}>
+                {supabaseConfigured ? "Supabase connected" : "Supabase missing"}
+              </span>
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Test outbound delivery and confirm edge functions are reachable.
+            </p>
+            <div className="mt-3 grid gap-3 md:grid-cols-2">
+              <input
+                className={inputClassName}
+                placeholder="Test phone"
+                value={testPhone}
+                onChange={(event) => setTestPhone(event.target.value)}
+              />
+              <input
+                className={inputClassName}
+                placeholder="Test email"
+                value={testEmail}
+                onChange={(event) => setTestEmail(event.target.value)}
+              />
+              <input
+                className={inputClassName}
+                placeholder="Email subject"
+                value={testSubject}
+                onChange={(event) => setTestSubject(event.target.value)}
+              />
+              <input
+                className={inputClassName}
+                placeholder="Message"
+                value={testBody}
+                onChange={(event) => setTestBody(event.target.value)}
+              />
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button
+                type="button"
+                className="rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground"
+                onClick={() => sendTestSmsMutation.mutate()}
+                disabled={!supabaseConfigured || sendTestSmsMutation.isPending}
+              >
+                {sendTestSmsMutation.isPending ? "Sending SMS..." : "Send test SMS"}
+              </button>
+              <button
+                type="button"
+                className="rounded-lg border border-border px-3 py-2 text-xs font-semibold text-foreground"
+                onClick={() => sendTestEmailMutation.mutate()}
+                disabled={!supabaseConfigured || sendTestEmailMutation.isPending}
+              >
+                {sendTestEmailMutation.isPending ? "Sending email..." : "Send test email"}
+              </button>
+            </div>
+          </div>
         </div>
 
         <div className="flex flex-1 flex-col gap-4 px-6 pb-8 lg:flex-row">
+          <section className="w-full rounded-2xl border border-border bg-card p-4 shadow-card lg:hidden">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-foreground">Messaging health</h2>
+              <span className={cn("text-xs font-semibold", supabaseConfigured ? "text-emerald-600" : "text-destructive")}>
+                {supabaseConfigured ? "Supabase connected" : "Supabase missing"}
+              </span>
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Test outbound delivery and confirm edge functions are reachable.
+            </p>
+            <div className="mt-3 grid gap-3 md:grid-cols-2">
+              <input
+                className={inputClassName}
+                placeholder="Test phone"
+                value={testPhone}
+                onChange={(event) => setTestPhone(event.target.value)}
+              />
+              <input
+                className={inputClassName}
+                placeholder="Test email"
+                value={testEmail}
+                onChange={(event) => setTestEmail(event.target.value)}
+              />
+              <input
+                className={inputClassName}
+                placeholder="Email subject"
+                value={testSubject}
+                onChange={(event) => setTestSubject(event.target.value)}
+              />
+              <input
+                className={inputClassName}
+                placeholder="Message"
+                value={testBody}
+                onChange={(event) => setTestBody(event.target.value)}
+              />
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button
+                type="button"
+                className="rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground"
+                onClick={() => sendTestSmsMutation.mutate()}
+                disabled={!supabaseConfigured || sendTestSmsMutation.isPending}
+              >
+                {sendTestSmsMutation.isPending ? "Sending SMS..." : "Send test SMS"}
+              </button>
+              <button
+                type="button"
+                className="rounded-lg border border-border px-3 py-2 text-xs font-semibold text-foreground"
+                onClick={() => sendTestEmailMutation.mutate()}
+                disabled={!supabaseConfigured || sendTestEmailMutation.isPending}
+              >
+                {sendTestEmailMutation.isPending ? "Sending email..." : "Send test email"}
+              </button>
+            </div>
+          </section>
+
           {/* Column 1: Thread list */}
           <section
             className={cn(
