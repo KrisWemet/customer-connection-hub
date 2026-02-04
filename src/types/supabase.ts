@@ -239,6 +239,26 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["checklist_items"]["Row"]>;
       };
+      follow_up_reminders: {
+        Row: {
+          id: string;
+          inquiry_id: string | null;
+          booking_id: string | null;
+          reminder_type: string;
+          message: string;
+          due_at: string;
+          is_completed: boolean;
+          completed_at: string | null;
+          created_by: string | null;
+          created_at: string | null;
+          updated_at: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["follow_up_reminders"]["Row"]> & {
+          message: string;
+          due_at: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["follow_up_reminders"]["Row"]>;
+      };
       communication_logs: {
         Row: {
           id: string;

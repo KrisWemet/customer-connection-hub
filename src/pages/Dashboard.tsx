@@ -6,13 +6,15 @@ import {
   AlertTriangle,
   Clock,
   RefreshCw,
-  RotateCcw
+  RotateCcw,
+  Bell
 } from "lucide-react";
 import { StatusCard } from "@/components/StatusCard";
 import { useDashboardStats } from "@/hooks/useDashboardData";
 import { DashboardSkeleton } from "@/components/DashboardSkeleton";
+import { FollowUpRemindersList } from "@/components/FollowUpReminders";
 import { showError } from "@/lib/error-handler";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function Dashboard() {
   const { stats, isLoading, error, upcomingBookings, overduePayments, pendingContracts, recentActivity } = useDashboardStats();
@@ -158,6 +160,17 @@ export default function Dashboard() {
               { label: "EVENT WEEKENDS", count: upcomingBookings.length },
             ]}
           />
+        </div>
+
+        {/* Follow-up Reminders */}
+        <div className="mt-8 rounded-xl border border-border bg-card p-6 shadow-card">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Bell size={20} className="text-primary" />
+              <h2 className="text-lg font-semibold text-foreground">Follow-up Reminders</h2>
+            </div>
+          </div>
+          <FollowUpRemindersList limit={5} />
         </div>
       </div>
     </AppLayout>
