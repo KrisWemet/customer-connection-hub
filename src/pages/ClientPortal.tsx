@@ -13,7 +13,7 @@ const quickActions = [
   {
     title: "Pay next deposit",
     subtitle: "Due in 14 days",
-    href: "/payments",
+    href: "/portal/payments",
     icon: CreditCard,
   },
   {
@@ -34,7 +34,7 @@ const sections = [
   {
     title: "Payments",
     description: "View your payment schedule and pay outstanding invoices.",
-    href: "/payments",
+    href: "/portal/payments",
     icon: CreditCard,
   },
   {
