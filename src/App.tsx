@@ -15,6 +15,7 @@ import ClientDocuments from "./pages/ClientDocuments";
 import ClientVendors from "./pages/ClientVendors";
 import ClientGuests from "./pages/ClientGuests";
 import ClientTimeline from "./pages/ClientTimeline";
+import ClientChecklist from "./pages/ClientChecklist";
 import NotFound from "./pages/NotFound";
 import Bookings from "./pages/Bookings";
 import Calendars from "./pages/Calendars";
@@ -190,6 +191,11 @@ const App = () => (
               <Route path="/portal/timeline" element={
                 <ProtectedRoute requiredRole="client">
                   <ClientTimeline />
+                </ProtectedRoute>
+              } />
+              <Route path="/portal/checklist" element={
+                <ProtectedRoute requiredRole="client">
+                  <ClientChecklist />
                 </ProtectedRoute>
               } />
 

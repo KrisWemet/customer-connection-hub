@@ -219,6 +219,26 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["timeline_events"]["Row"]>;
       };
+      checklist_items: {
+        Row: {
+          id: string;
+          booking_id: string;
+          title: string;
+          description: string | null;
+          due_date: string | null;
+          category: string | null;
+          is_completed: boolean;
+          completed_at: string | null;
+          sort_order: number;
+          created_at: string | null;
+          updated_at: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["checklist_items"]["Row"]> & {
+          booking_id: string;
+          title: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["checklist_items"]["Row"]>;
+      };
       user_profiles: {
         Row: {
           id: string;

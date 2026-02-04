@@ -64,7 +64,7 @@ const sections = [
   {
     title: "Planning Checklist",
     description: "Stay on track with upcoming tasks.",
-    href: "/checklist",
+    href: "/portal/checklist",
     icon: ClipboardList,
   },
   {
