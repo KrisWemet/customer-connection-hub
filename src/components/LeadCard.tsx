@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
 import { Star, Filter, Plus, Users } from "lucide-react";
-import { Link } from "react-router-dom";
 
 export interface LeadCardData {
   id: string;
@@ -16,13 +15,14 @@ export interface LeadCardData {
 
 interface LeadCardProps {
   lead: LeadCardData;
+  onClick?: () => void;
 }
 
-export function LeadCard({ lead }: LeadCardProps) {
+export function LeadCard({ lead, onClick }: LeadCardProps) {
   return (
-    <Link
-      to={`/leads/${lead.id}`}
-      className="block bg-card rounded-lg border border-border/50 shadow-card p-4 mb-3 animate-fade-in hover:shadow-card-hover transition-shadow focus:outline-none focus:ring-2 focus:ring-primary/30"
+    <button
+      onClick={onClick}
+      className="block w-full text-left bg-card rounded-lg border border-border/50 shadow-card p-4 mb-3 animate-fade-in hover:shadow-card-hover transition-shadow focus:outline-none focus:ring-2 focus:ring-primary/30"
     >
       <div className="mb-3">
         <h4 className="font-semibold text-foreground text-sm">{lead.title}</h4>
@@ -96,6 +96,6 @@ export function LeadCard({ lead }: LeadCardProps) {
       <span className="block text-xs text-primary hover:underline mt-2">
         View Pipeline History ▾
       </span>
-    </Link>
+    </button>
   );
 }

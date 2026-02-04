@@ -6,9 +6,10 @@ interface KanbanColumnProps {
   title: string;
   count: number;
   leads: LeadCardData[];
+  onLeadClick?: (leadId: string) => void;
 }
 
-export function KanbanColumn({ title, count, leads }: KanbanColumnProps) {
+export function KanbanColumn({ title, count, leads, onLeadClick }: KanbanColumnProps) {
   return (
     <div className="bg-muted/50 rounded-xl flex-1 min-w-[280px] max-w-[400px] flex flex-col">
       <div className="p-4 border-b border-border/50">
@@ -20,7 +21,7 @@ export function KanbanColumn({ title, count, leads }: KanbanColumnProps) {
       </div>
       <div className="p-3 flex-1 overflow-y-auto max-h-[calc(100vh-300px)]">
         {leads.map((lead) => (
-          <LeadCard key={lead.id} lead={lead} />
+          <LeadCard key={lead.id} lead={lead} onClick={() => onLeadClick?.(lead.id)} />
         ))}
       </div>
     </div>

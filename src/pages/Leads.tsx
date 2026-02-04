@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AppLayout } from "@/components/AppLayout";
 import { KanbanColumn } from "@/components/KanbanColumn";
 import { LeadCardData } from "@/components/LeadCard";
+import { LeadDetailModal } from "@/components/LeadDetailModal";
 import { SupabaseNotice } from "@/components/SupabaseNotice";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -60,6 +61,7 @@ export default function Leads() {
   const [activeQuickView, setActiveQuickView] = useState<string>("Open + Holds");
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   const [formState, setFormState] = useState({
     full_name: "",
     email: "",
@@ -195,6 +197,10 @@ export default function Leads() {
       });
     },
   });
+
+  const selectedInquiry = useMemo(() => {
+    return inquiries.find((i) => i.id === selectedLeadId) || null;
+  }, [inquiries, selectedLeadId]);
 
   const filteredColumns = columns
     .filter((column) => {
@@ -482,11 +488,19 @@ export default function Leads() {
                   title={column.title}
                   count={column.leads.length}
                   leads={column.leads}
+                  onLeadClick={(id) => setSelectedLeadId(id)}
                 />
               ))}
             </div>
           </div>
         </div>
+
+        {/* Lead Detail Modal */}
+        <LeadDetailModal
+          inquiry={selectedInquiry}
+          isOpen={!!selectedLeadId}
+          onClose={() => setSelectedLeadId(null)}
+        />
       </div>
     </AppLayout>
   );
