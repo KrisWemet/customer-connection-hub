@@ -239,6 +239,24 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["checklist_items"]["Row"]>;
       };
+      communication_logs: {
+        Row: {
+          id: string;
+          booking_id: string | null;
+          inquiry_id: string | null;
+          channel: "email" | "sms" | "note";
+          direction: "inbound" | "outbound";
+          subject: string | null;
+          body: string | null;
+          status: "logged" | "sent" | "failed";
+          provider: string | null;
+          created_by: string | null;
+          created_at: string | null;
+          updated_at: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["communication_logs"]["Row"]>;
+        Update: Partial<Database["public"]["Tables"]["communication_logs"]["Row"]>;
+      };
       user_profiles: {
         Row: {
           id: string;

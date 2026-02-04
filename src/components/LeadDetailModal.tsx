@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { X, Calendar, Users, Mail, Phone, MapPin, CheckCircle, Loader2 } from "lucide-react";
+import { X, Calendar, Users, Mail, Phone, MapPin, CheckCircle, Loader2, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase, supabaseConfigured } from "@/lib/supabase/client";
 import type { Tables } from "@/types/supabase";
 import { toast } from "@/components/ui/sonner";
+import { ActivityTimeline } from "./ActivityTimeline";
 
 type Inquiry = Tables<"inquiries">;
 
@@ -325,6 +326,11 @@ export function LeadDetailModal({ inquiry, isOpen, onClose }: LeadDetailModalPro
               </div>
             </div>
           )}
+
+          {/* Activity Timeline */}
+          <div className="rounded-xl border border-border bg-card p-4">
+            <ActivityTimeline inquiryId={inquiry.id} />
+          </div>
         </div>
       </div>
     </div>
