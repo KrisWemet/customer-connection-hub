@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { X, Calendar, Users, Mail, Phone, MapPin, CheckCircle, Loader2, MessageSquare } from "lucide-react";
+import { X, Calendar, Users, Mail, Phone, MapPin, CheckCircle, Loader2, MessageSquare, ArrowRight, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase, supabaseConfigured } from "@/lib/supabase/client";
 import type { Tables } from "@/types/supabase";
@@ -8,6 +8,18 @@ import { toast } from "@/components/ui/sonner";
 import { ActivityTimeline } from "./ActivityTimeline";
 
 type Inquiry = Tables<"inquiries">;
+type InquiryStatus = Inquiry["status"];
+
+const STATUS_FLOW: { status: InquiryStatus; label: string; color: string }[] = [
+  { status: "inquiry", label: "New Inquiry", color: "bg-blue-500" },
+  { status: "contacted", label: "Contacted", color: "bg-purple-500" },
+  { status: "tour_scheduled", label: "Tour Scheduled", color: "bg-amber-500" },
+  { status: "proposal_sent", label: "Proposal Sent", color: "bg-pink-500" },
+  { status: "booked", label: "Booked", color: "bg-emerald-500" },
+  { status: "completed", label: "Completed", color: "bg-teal-500" },
+  { status: "declined", label: "Declined", color: "bg-red-500" },
+  { status: "hold", label: "On Hold", color: "bg-gray-500" },
+];
 
 interface LeadDetailModalProps {
   inquiry: Inquiry | null;
@@ -107,6 +119,35 @@ export function LeadDetailModal({ inquiry, isOpen, onClose }: LeadDetailModalPro
     },
   });
 
+  const updateStatus = useMutation({
+    mutationFn: async (newStatus: InquiryStatus) => {
+      if (!inquiry) throw new Error("No inquiry selected");
+      const { error } = await supabase
+        .from("inquiries")
+        .update({ status: newStatus })
+        .eq("id", inquiry.id);
+      if (error) throw error;
+
+      // Log the status change in communication logs
+      const { error: logError } = await supabase.from("communication_logs").insert({
+        inquiry_id: inquiry.id,
+        channel: "note",
+        direction: "outbound",
+        body: `Status updated to "${newStatus.replace("_", " ")}"`,
+        status: "logged",
+      });
+      if (logError) console.error("Failed to log status change:", logError);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inquiries"] });
+      queryClient.invalidateQueries({ queryKey: ["communication_logs", inquiry?.id] });
+      toast.success("Status updated");
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Failed to update status");
+    },
+  });
+
   if (!isOpen || !inquiry) return null;
 
   const isBooked = inquiry.status === "booked" || inquiry.status === "completed";
@@ -139,6 +180,96 @@ export function LeadDetailModal({ inquiry, isOpen, onClose }: LeadDetailModalPro
         </div>
 
         <div className="p-6 space-y-6">
+          {/* Status Update */}
+          <div className="rounded-xl border border-border/50 bg-muted/30 p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-xs text-muted-foreground">Current Status</p>
+                <div className="flex items-center gap-2">
+                  <span className={cn(
+                    "h-2.5 w-2.5 rounded-full",
+                    STATUS_FLOW.find(s => s.status === inquiry.status)?.color || "bg-gray-400"
+                  )} />
+                  <span className="font-semibold text-foreground capitalize">
+                    {inquiry.status.replace("_", " ")}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs text-muted-foreground mr-1">Move to:</span>
+                {STATUS_FLOW.filter(s => s.status !== inquiry.status && s.status !== "booked" && s.status !== "completed").slice(0, 4).map((status) => (
+                  <button
+                    key={status.status}
+                    onClick={() => updateStatus.mutate(status.status)}
+                    disabled={updateStatus.isPending}
+                    className={cn(
+                      "flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
+                      "bg-background border border-border hover:bg-muted"
+                    )}
+                  >
+                    {updateStatus.isPending && updateStatus.variables === status.status ? (
+                      <Loader2 size={12} className="animate-spin" />
+                    ) : (
+                      <ArrowRight size={12} />
+                    )}
+                    {status.label}
+                  </button>
+                ))}
+
+                {/* More status dropdown */}
+                <select
+                  value=""
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      updateStatus.mutate(e.target.value as InquiryStatus);
+                      e.target.value = "";
+                    }
+                  }}
+                  disabled={updateStatus.isPending}
+                  className="rounded-lg border border-border bg-background px-2 py-1.5 text-xs"
+                >
+                  <option value="">More...</option>
+                  {STATUS_FLOW.filter(s => s.status !== inquiry.status).map((status) => (
+                    <option key={status.status} value={status.status}>
+                      {status.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Pipeline Progress */}
+            <div className="mt-4">
+              <div className="flex items-center gap-1">
+                {STATUS_FLOW.filter(s => !["declined", "hold"].includes(s.status)).map((status, idx, arr) => {
+                  const isActive = status.status === inquiry.status;
+                  const isPast = STATUS_FLOW.findIndex(s => s.status === inquiry.status) > STATUS_FLOW.findIndex(s => s.status === status.status);
+                  const isBookedStatus = inquiry.status === "booked" || inquiry.status === "completed";
+
+                  return (
+                    <div key={status.status} className="flex items-center">
+                      <div
+                        className={cn(
+                          "h-2 flex-1 rounded-full transition-all min-w-[40px]",
+                          isActive ? status.color : isPast || (isBookedStatus && idx < arr.length - 1) ? "bg-emerald-500" : "bg-muted"
+                        )}
+                        title={status.label}
+                      />
+                      {idx < arr.length - 1 && (
+                        <div className="w-1" />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-1 flex justify-between text-[10px] text-muted-foreground">
+                <span>Inquiry</span>
+                <span>Booked</span>
+              </div>
+            </div>
+          </div>
+
           {/* Contact Info */}
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex items-center gap-3 rounded-lg border border-border/50 bg-background p-3">
