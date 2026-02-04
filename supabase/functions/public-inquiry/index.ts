@@ -59,6 +59,49 @@ Deno.serve(async (req) => {
     auth: { persistSession: false },
   });
 
+  // Auto-create client account if email provided
+  let userId: string | null = null;
+  if (payload.email) {
+    // Check if user already exists
+    const { data: existingUser } = await supabase
+      .from("user_profiles")
+      .select("id")
+      .eq("email", payload.email.toLowerCase())
+      .maybeSingle();
+
+    if (existingUser) {
+      userId = existingUser.id;
+    } else {
+      // Create new auth user with service role
+      const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+        email: payload.email.toLowerCase(),
+        email_confirm: false, // They'll need to set password via invite/reset
+        user_metadata: {
+          full_name: payload.full_name,
+        },
+      });
+
+      if (authError) {
+        console.error("Auth user creation error:", authError);
+      } else if (authUser?.user) {
+        userId = authUser.user.id;
+
+        // Create user profile as client
+        const { error: profileError } = await supabase.from("user_profiles").insert({
+          id: userId,
+          email: payload.email.toLowerCase(),
+          name: payload.full_name,
+          role: "client",
+        });
+
+        if (profileError) {
+          console.error("Profile creation error:", profileError);
+        }
+      }
+    }
+  }
+
+  // Create the inquiry
   const { data, error } = await supabase
     .from("inquiries")
     .insert({
@@ -82,7 +125,13 @@ Deno.serve(async (req) => {
     });
   }
 
-  return new Response(JSON.stringify({ id: data?.id ?? "unknown" }), {
+  return new Response(JSON.stringify({ 
+    id: data?.id ?? "unknown",
+    account_created: !!userId,
+    message: userId 
+      ? "Inquiry submitted. A client account has been created. Check your email to set your password."
+      : "Inquiry submitted successfully."
+  }), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 });
