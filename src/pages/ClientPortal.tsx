@@ -19,7 +19,7 @@ const quickActions = [
   {
     title: "Review contract",
     subtitle: "Signature needed",
-    href: "/contracts",
+    href: "/portal/contracts",
     icon: FileText,
   },
   {
@@ -40,7 +40,7 @@ const sections = [
   {
     title: "Contracts",
     description: "Review and sign agreements and waivers.",
-    href: "/contracts",
+    href: "/portal/contracts",
     icon: FileText,
   },
   {

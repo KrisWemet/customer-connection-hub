@@ -122,6 +122,37 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["upsells"]["Row"]>;
       };
+      contracts: {
+        Row: {
+          id: string;
+          booking_id: string | null;
+          inquiry_id: string | null;
+          contract_number: string | null;
+          status: string;
+          package_type: Database["public"]["Enums"]["package_type"];
+          event_start_date: string | null;
+          event_end_date: string | null;
+          total_amount: number;
+          deposit_amount: number;
+          client_name: string | null;
+          client_email: string | null;
+          client_phone: string | null;
+          sent_at: string | null;
+          viewed_at: string | null;
+          signed_at: string | null;
+          client_ip_address: string | null;
+          client_signature_data: string | null;
+          pdf_url: string | null;
+          signed_pdf_url: string | null;
+          created_by: string | null;
+          created_at: string | null;
+          updated_at: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["contracts"]["Row"]> & {
+          package_type: Database["public"]["Enums"]["package_type"];
+        };
+        Update: Partial<Database["public"]["Tables"]["contracts"]["Row"]>;
+      };
       user_profiles: {
         Row: {
           id: string;
