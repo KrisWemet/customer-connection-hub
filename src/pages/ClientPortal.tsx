@@ -67,6 +67,12 @@ const sections = [
     href: "/checklist",
     icon: ClipboardList,
   },
+  {
+    title: "Recommended Vendors",
+    description: "Handpicked vendors we love working with.",
+    href: "/portal/vendors",
+    icon: Users,
+  },
 ];
 
 export default function ClientPortal() {
