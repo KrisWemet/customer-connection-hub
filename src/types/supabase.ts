@@ -196,6 +196,29 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["guests"]["Row"]>;
       };
+      timeline_events: {
+        Row: {
+          id: string;
+          booking_id: string;
+          event_date: string;
+          start_time: string;
+          end_time: string | null;
+          title: string;
+          description: string | null;
+          location: string | null;
+          vendor_id: string | null;
+          status: string;
+          created_at: string | null;
+          updated_at: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["timeline_events"]["Row"]> & {
+          booking_id: string;
+          event_date: string;
+          start_time: string;
+          title: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["timeline_events"]["Row"]>;
+      };
       user_profiles: {
         Row: {
           id: string;

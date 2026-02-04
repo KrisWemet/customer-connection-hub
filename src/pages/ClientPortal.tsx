@@ -58,7 +58,7 @@ const sections = [
   {
     title: "Weekend Timeline",
     description: "Build your ceremony and reception schedule.",
-    href: "/timeline",
+    href: "/portal/timeline",
     icon: ListTodo,
   },
   {
