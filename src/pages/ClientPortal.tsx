@@ -1,39 +1,29 @@
 import { AppLayout } from "@/components/AppLayout";
 import { ModuleCard } from "@/components/ModuleCard";
-import { 
-  Users, 
-  FileText, 
-  File, 
-  LayoutGrid, 
-  Utensils, 
-  ListTodo, 
-  Image,
+import {
+  Users,
+  FileText,
+  File,
+  ListTodo,
   CreditCard,
   ClipboardList,
-  Building2,
-  UserCircle,
-  MapPin
 } from "lucide-react";
 
 const modules = [
-  { title: "Guest List", count: 78, icon: Users, color: "bg-module-calendar", href: "/guests" },
-  { title: "RV & Camping", count: 12, icon: ClipboardList, color: "bg-status-warning", href: "/camping" },
+  { title: "Payments", count: 3, icon: CreditCard, color: "bg-status-warning", href: "/payments", badge: { text: "1 payment due soon", variant: "danger" as const } },
   { title: "Contracts", count: 1, icon: FileText, color: "bg-status-success", href: "/contracts" },
   { title: "Documents", count: 4, icon: File, color: "bg-module-files", href: "/documents" },
-  { title: "Floor Plan", count: 1, icon: LayoutGrid, color: "bg-status-warning", href: "/floorplan" },
-  { title: "Vendors", count: 5, icon: Utensils, color: "bg-status-success", href: "/vendors" },
+  { title: "Guest List", count: 78, icon: Users, color: "bg-module-calendar", href: "/guests" },
   { title: "Weekend Timeline", count: 8, icon: ListTodo, color: "bg-status-danger", href: "/timeline" },
-  { title: "Payments", count: 3, icon: CreditCard, color: "bg-status-warning", href: "/payments", badge: { text: "1 payment due soon", variant: "danger" as const } },
   { title: "Planning Checklist", count: 24, icon: ClipboardList, color: "bg-status-purple", href: "/checklist", badge: { text: "4 items due this month", variant: "warning" as const } },
   { title: "To-Do's", count: 14, icon: ListTodo, color: "bg-status-success", href: "/todos", badge: { text: "6 overdue / 3 upcoming", variant: "warning" as const } },
-  { title: "Photo Share", count: 2, icon: Image, color: "bg-status-success", href: "/photos" },
 ];
 
 const quickLinks = [
   { title: "Payment Schedule", icon: CreditCard, href: "/payments" },
-  { title: "Couple Profile", icon: UserCircle, href: "/profile" },
-  { title: "Preferred Vendors", icon: Building2, href: "/vendors" },
-  { title: "Venue Guide", icon: MapPin, href: "/venue-guide" },
+  { title: "Contracts", icon: FileText, href: "/contracts" },
+  { title: "Documents", icon: File, href: "/documents" },
+  { title: "Timeline", icon: ListTodo, href: "/timeline" },
 ];
 
 export default function ClientPortal() {
