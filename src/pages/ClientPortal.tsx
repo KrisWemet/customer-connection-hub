@@ -1,79 +1,145 @@
 import { AppLayout } from "@/components/AppLayout";
-import { ModuleCard } from "@/components/ModuleCard";
 import {
-  Users,
+  CalendarCheck,
+  CreditCard,
   FileText,
   File,
+  Users,
   ListTodo,
-  CreditCard,
   ClipboardList,
 } from "lucide-react";
 
-const modules = [
-  { title: "Payments", count: 3, icon: CreditCard, color: "bg-status-warning", href: "/payments", badge: { text: "1 payment due soon", variant: "danger" as const } },
-  { title: "Contracts", count: 1, icon: FileText, color: "bg-status-success", href: "/contracts" },
-  { title: "Documents", count: 4, icon: File, color: "bg-module-files", href: "/documents" },
-  { title: "Guest List", count: 78, icon: Users, color: "bg-module-calendar", href: "/guests" },
-  { title: "Weekend Timeline", count: 8, icon: ListTodo, color: "bg-status-danger", href: "/timeline" },
-  { title: "Planning Checklist", count: 24, icon: ClipboardList, color: "bg-status-purple", href: "/checklist", badge: { text: "4 items due this month", variant: "warning" as const } },
-  { title: "To-Do's", count: 14, icon: ListTodo, color: "bg-status-success", href: "/todos", badge: { text: "6 overdue / 3 upcoming", variant: "warning" as const } },
+const quickActions = [
+  {
+    title: "Pay next deposit",
+    subtitle: "Due in 14 days",
+    href: "/payments",
+    icon: CreditCard,
+  },
+  {
+    title: "Review contract",
+    subtitle: "Signature needed",
+    href: "/contracts",
+    icon: FileText,
+  },
+  {
+    title: "Upload documents",
+    subtitle: "Share your drafts",
+    href: "/documents",
+    icon: File,
+  },
 ];
 
-const quickLinks = [
-  { title: "Payment Schedule", icon: CreditCard, href: "/payments" },
-  { title: "Contracts", icon: FileText, href: "/contracts" },
-  { title: "Documents", icon: File, href: "/documents" },
-  { title: "Timeline", icon: ListTodo, href: "/timeline" },
+const sections = [
+  {
+    title: "Payments",
+    description: "View your payment schedule and pay outstanding invoices.",
+    href: "/payments",
+    icon: CreditCard,
+  },
+  {
+    title: "Contracts",
+    description: "Review and sign agreements and waivers.",
+    href: "/contracts",
+    icon: FileText,
+  },
+  {
+    title: "Documents",
+    description: "Upload floor plans, timelines, and important files.",
+    href: "/documents",
+    icon: File,
+  },
+  {
+    title: "Guest List",
+    description: "Track RSVPs and guest counts in one place.",
+    href: "/guests",
+    icon: Users,
+  },
+  {
+    title: "Weekend Timeline",
+    description: "Build your ceremony and reception schedule.",
+    href: "/timeline",
+    icon: ListTodo,
+  },
+  {
+    title: "Planning Checklist",
+    description: "Stay on track with upcoming tasks.",
+    href: "/checklist",
+    icon: ClipboardList,
+  },
 ];
 
 export default function ClientPortal() {
   return (
     <AppLayout>
-      <div className="p-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-status-danger italic">
-            Welcome to Rustic Retreat!
-          </h1>
-          <div className="text-right">
-            <p className="text-lg font-semibold text-foreground">MORGAN + TAYLOR</p>
-            <p className="text-sm text-muted-foreground">September 19, 2026</p>
-          </div>
-        </div>
+      <div className="px-6 py-10 lg:px-12">
+        <div className="mx-auto max-w-5xl space-y-8">
+          <header className="rounded-3xl border border-border/60 bg-card/90 p-8 shadow-card">
+            <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                  Rustic Retreat Wedding Portal
+                </p>
+                <h1 className="mt-3 text-3xl font-semibold text-foreground md:text-4xl">
+                  Welcome, Morgan + Taylor
+                </h1>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  September 19, 2026 · Weekend celebration
+                </p>
+              </div>
+              <div className="rounded-2xl border border-border/60 bg-background px-5 py-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2 text-foreground">
+                  <CalendarCheck size={18} />
+                  <span className="font-semibold">Next milestone</span>
+                </div>
+                <p className="mt-1">Final guest count due Aug 20</p>
+              </div>
+            </div>
+          </header>
 
-        <div className="grid grid-cols-12 gap-6">
-          {/* Quick Links Sidebar */}
-          <div className="col-span-12 md:col-span-3">
-            <div className="bg-card rounded-xl border border-border/50 shadow-card overflow-hidden">
-              {quickLinks.map((link, idx) => (
+          <section className="grid gap-4 md:grid-cols-3">
+            {quickActions.map((action) => (
+              <a
+                key={action.title}
+                href={action.href}
+                className="group rounded-2xl border border-border/60 bg-card p-5 shadow-card transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="rounded-xl bg-primary/10 p-2 text-primary">
+                    <action.icon size={20} />
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{action.title}</p>
+                    <p className="text-xs text-muted-foreground">{action.subtitle}</p>
+                  </div>
+                </div>
+              </a>
+            ))}
+          </section>
+
+          <section className="rounded-3xl border border-border/60 bg-card p-6 shadow-card">
+            <h2 className="text-lg font-semibold text-foreground">Your planning hub</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Everything you need for your wedding weekend, organized and easy to find.
+            </p>
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {sections.map((section) => (
                 <a
-                  key={idx}
-                  href={link.href}
-                  className="flex items-center gap-3 px-4 py-3 text-sm text-primary hover:bg-muted transition-colors border-b border-border/50 last:border-b-0"
+                  key={section.title}
+                  href={section.href}
+                  className="flex items-start gap-4 rounded-2xl border border-border/60 bg-background p-4 transition hover:border-primary/40"
                 >
-                  <link.icon size={18} />
-                  <span>{link.title}</span>
+                  <span className="rounded-xl bg-muted p-2 text-muted-foreground">
+                    <section.icon size={20} />
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{section.title}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{section.description}</p>
+                  </div>
                 </a>
               ))}
             </div>
-          </div>
-
-          {/* Module Cards Grid */}
-          <div className="col-span-12 md:col-span-9">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {modules.map((module, idx) => (
-                <ModuleCard
-                  key={idx}
-                  title={module.title}
-                  count={module.count}
-                  icon={module.icon}
-                  iconColor={module.color}
-                  href={module.href}
-                  badge={module.badge}
-                />
-              ))}
-            </div>
-          </div>
+          </section>
         </div>
       </div>
     </AppLayout>
