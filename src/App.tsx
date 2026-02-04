@@ -13,6 +13,8 @@ import ClientPayments from "./pages/ClientPayments";
 import ClientContracts from "./pages/ClientContracts";
 import ClientDocuments from "./pages/ClientDocuments";
 import ClientVendors from "./pages/ClientVendors";
+import ClientGuests from "./pages/ClientGuests";
+import ClientGuests from "./pages/ClientGuests";
 import NotFound from "./pages/NotFound";
 import Bookings from "./pages/Bookings";
 import Calendars from "./pages/Calendars";
@@ -178,6 +180,11 @@ const App = () => (
               <Route path="/portal/vendors" element={
                 <ProtectedRoute requiredRole="client">
                   <ClientVendors />
+                </ProtectedRoute>
+              } />
+              <Route path="/portal/guests" element={
+                <ProtectedRoute requiredRole="client">
+                  <ClientGuests />
                 </ProtectedRoute>
               } />
 

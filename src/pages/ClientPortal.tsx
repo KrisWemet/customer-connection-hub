@@ -52,7 +52,7 @@ const sections = [
   {
     title: "Guest List",
     description: "Track RSVPs and guest counts in one place.",
-    href: "/guests",
+    href: "/portal/guests",
     icon: Users,
   },
   {

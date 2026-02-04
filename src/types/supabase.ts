@@ -173,6 +173,29 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["documents"]["Row"]>;
       };
+      guests: {
+        Row: {
+          id: string;
+          booking_id: string;
+          first_name: string;
+          last_name: string | null;
+          email: string | null;
+          phone: string | null;
+          rsvp_status: string;
+          meal_preference: string | null;
+          dietary_restrictions: string | null;
+          plus_one: boolean;
+          plus_one_name: string | null;
+          notes: string | null;
+          created_at: string | null;
+          updated_at: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["guests"]["Row"]> & {
+          booking_id: string;
+          first_name: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["guests"]["Row"]>;
+      };
       user_profiles: {
         Row: {
           id: string;
