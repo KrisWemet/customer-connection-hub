@@ -25,7 +25,7 @@ const quickActions = [
   {
     title: "Upload documents",
     subtitle: "Share your drafts",
-    href: "/documents",
+    href: "/portal/documents",
     icon: File,
   },
 ];
@@ -46,7 +46,7 @@ const sections = [
   {
     title: "Documents",
     description: "Upload floor plans, timelines, and important files.",
-    href: "/documents",
+    href: "/portal/documents",
     icon: File,
   },
   {

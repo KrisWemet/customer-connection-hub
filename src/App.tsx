@@ -11,6 +11,7 @@ import Leads from "./pages/Leads";
 import ClientPortal from "./pages/ClientPortal";
 import ClientPayments from "./pages/ClientPayments";
 import ClientContracts from "./pages/ClientContracts";
+import ClientDocuments from "./pages/ClientDocuments";
 import NotFound from "./pages/NotFound";
 import Bookings from "./pages/Bookings";
 import Calendars from "./pages/Calendars";
@@ -166,6 +167,11 @@ const App = () => (
               <Route path="/portal/contracts" element={
                 <ProtectedRoute requiredRole="client">
                   <ClientContracts />
+                </ProtectedRoute>
+              } />
+              <Route path="/portal/documents" element={
+                <ProtectedRoute requiredRole="client">
+                  <ClientDocuments />
                 </ProtectedRoute>
               } />
 

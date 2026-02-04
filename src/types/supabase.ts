@@ -153,6 +153,26 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["contracts"]["Row"]>;
       };
+      documents: {
+        Row: {
+          id: string;
+          booking_id: string | null;
+          uploaded_by: string | null;
+          uploaded_by_role: string | null;
+          file_name: string | null;
+          file_type: string | null;
+          file_size: number | null;
+          storage_path: string | null;
+          description: string | null;
+          created_at: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["documents"]["Row"]> & {
+          booking_id: string;
+          file_name: string;
+          storage_path: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["documents"]["Row"]>;
+      };
       user_profiles: {
         Row: {
           id: string;
